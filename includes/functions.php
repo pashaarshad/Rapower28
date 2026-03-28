@@ -1,0 +1,58 @@
+<?php
+// Helper functions
+
+function getArticleUrl($article) {
+    return '?page=article&slug=' . $article['slug'];
+}
+
+function getCategoryUrl($cat) {
+    return '?page=category&slug=' . $cat['slug'];
+}
+
+function formatDate($date) {
+    return date('M d, Y', strtotime($date));
+}
+
+function getArticleTitle($article) {
+    global $CURRENT_LANG;
+    $key = 'title_' . $CURRENT_LANG;
+    return $article[$key] ?? $article['title_en'];
+}
+
+function getArticleBody($article) {
+    global $CURRENT_LANG;
+    $key = 'body_' . $CURRENT_LANG;
+    return $article[$key] ?? $article['body_en'];
+}
+
+function getArticlesByCategory($articles, $catSlug, $limit = 4) {
+    $filtered = array_filter($articles, fn($a) => $a['category'] === $catSlug);
+    return array_slice($filtered, 0, $limit);
+}
+
+function getFeaturedArticles($articles) {
+    return array_filter($articles, fn($a) => $a['is_featured']);
+}
+
+function getImagePath($img) {
+    return 'assets/images/news/' . $img;
+}
+
+function getSiteName() {
+    global $CURRENT_LANG;
+    if ($CURRENT_LANG === 'kn') return SITE_NAME_KN;
+    if ($CURRENT_LANG === 'hi') return SITE_NAME_HI;
+    return SITE_NAME;
+}
+
+function getSiteTagline() {
+    global $CURRENT_LANG;
+    if ($CURRENT_LANG === 'kn') return SITE_TAGLINE;
+    if ($CURRENT_LANG === 'hi') return SITE_TAGLINE_HI;
+    return SITE_TAGLINE_EN;
+}
+
+function truncateText($text, $length = 120) {
+    if (strlen($text) <= $length) return $text;
+    return substr($text, 0, $length) . '...';
+}

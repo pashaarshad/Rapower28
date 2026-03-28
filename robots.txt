@@ -1,0 +1,9 @@
+User-agent: *
+Allow: /
+Disallow: /admin/
+Disallow: /config/
+Disallow: /includes/
+Disallow: /database/
+Disallow: /api/
+
+Sitemap: https://rapower28.com/sitemap.xml

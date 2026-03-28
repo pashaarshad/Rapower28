@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:news="http://www.google.com/schemas/sitemap-news/0.9"
+        xmlns:xhtml="http://www.w3.org/1999/xhtml">
+  <url>
+    <loc>https://rapower28.com/</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://rapower28.com/?lang=en"/>
+    <xhtml:link rel="alternate" hreflang="kn" href="https://rapower28.com/?lang=kn"/>
+    <xhtml:link rel="alternate" hreflang="hi" href="https://rapower28.com/?lang=hi"/>
+    <changefreq>hourly</changefreq>
+    <priority>1.0</priority>
+  </url>
+  <url>
+    <loc>https://rapower28.com/?page=category&amp;slug=politics</loc>
+    <changefreq>hourly</changefreq><priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://rapower28.com/?page=category&amp;slug=sports</loc>
+    <changefreq>hourly</changefreq><priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://rapower28.com/?page=category&amp;slug=district</loc>
+    <changefreq>hourly</changefreq><priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://rapower28.com/?page=category&amp;slug=crime</loc>
+    <changefreq>daily</changefreq><priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://rapower28.com/?page=category&amp;slug=health-environment</loc>
+    <changefreq>daily</changefreq><priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://rapower28.com/?page=category&amp;slug=country</loc>
+    <changefreq>hourly</changefreq><priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://rapower28.com/?page=category&amp;slug=state</loc>
+    <changefreq>hourly</changefreq><priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://rapower28.com/?page=category&amp;slug=literature</loc>
+    <changefreq>daily</changefreq><priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://rapower28.com/?page=category&amp;slug=astrology</loc>
+    <changefreq>daily</changefreq><priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://rapower28.com/?page=about</loc>
+    <changefreq>monthly</changefreq><priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://rapower28.com/?page=contact</loc>
+    <changefreq>monthly</changefreq><priority>0.5</priority>
+  </url>
+  <!-- Article URLs will be dynamically added in Phase 2 -->
+  <url>
+    <loc>https://rapower28.com/?page=article&amp;slug=karnataka-budget-2026-highlights</loc>
+    <news:news>
+      <news:publication><news:name>Ra. Power 28</news:name><news:language>en</news:language></news:publication>
+      <news:publication_date>2026-03-28</news:publication_date>
+      <news:title>Karnataka Budget 2026 Highlights</news:title>
+    </news:news>
+    <priority>0.8</priority>
+  </url>
+</urlset>
