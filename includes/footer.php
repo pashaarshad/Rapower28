@@ -36,7 +36,6 @@
                     <li><a href="?page=contact"><?= __('contact') ?></a></li>
                     <li><a href="#"><?= __('privacy') ?></a></li>
                     <li><a href="#"><?= __('terms') ?></a></li>
-                    <li><a href="admin/login.php"><?= __('admin_panel') ?></a></li>
                 </ul>
             </div>
         </div>

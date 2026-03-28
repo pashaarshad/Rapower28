@@ -51,7 +51,7 @@ $related = array_slice($related, 0, 3);
                 </div>
 
                 <div class="article-body" itemprop="articleBody">
-                    <p><?= nl2br(htmlspecialchars(getArticleBody($article))) ?></p>
+                    <?= cleanArticleBody(getArticleBody($article)) ?>
                     <p><?= $CURRENT_LANG === 'kn' ? 'ಈ ಸುದ್ದಿಯ ಬಗ್ಗೆ ಹೆಚ್ಚಿನ ಮಾಹಿತಿಗಾಗಿ ನಮ್ಮ ವೆಬ್‌ಸೈಟ್ ಅನ್ನು ನಿಯಮಿತವಾಗಿ ಭೇಟಿ ನೀಡಿ. ಈ ಬೆಳವಣಿಗೆಯ ಬಗ್ಗೆ ಹೆಚ್ಚಿನ ವಿವರಗಳು ಬಂದಂತೆ ನಾವು ನಿಮ್ಮನ್ನು ಅಪ್‌ಡೇಟ್ ಮಾಡುತ್ತೇವೆ. ಕರ್ನಾಟಕದ ಎಲ್ಲಾ ಇತ್ತೀಚಿನ ಸುದ್ದಿಗಳಿಗಾಗಿ ರಾ.ಪವರ್ 28 ಅನ್ನು ಅನುಸರಿಸಿ.' : ($CURRENT_LANG === 'hi' ? 'इस खबर के बारे में अधिक जानकारी के लिए हमारी वेबसाइट पर नियमित रूप से आएं। जैसे-जैसे इस विकास के बारे में अधिक विवरण आएंगे, हम आपको अपडेट करते रहेंगे। कर्नाटक की सभी नवीनतम खबरों के लिए रा. पावर 28 को फॉलो करें।' : 'For more information about this story, visit our website regularly. We will keep you updated as more details emerge about this development. Follow Ra. Power 28 for all the latest news from Karnataka, covering politics, sports, crime, health, and more.') ?></p>
                 </div>
 

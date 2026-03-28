@@ -55,7 +55,6 @@
                 <a href="?lang=kn<?= isset($_GET['page']) ? '&page='.$_GET['page'] : '' ?><?= isset($_GET['slug']) ? '&slug='.$_GET['slug'] : '' ?>" class="<?= $CURRENT_LANG === 'kn' ? 'active' : '' ?>">ಕ</a>
                 <a href="?lang=hi<?= isset($_GET['page']) ? '&page='.$_GET['page'] : '' ?><?= isset($_GET['slug']) ? '&slug='.$_GET['slug'] : '' ?>" class="<?= $CURRENT_LANG === 'hi' ? 'active' : '' ?>">हि</a>
             </div>
-            <a href="admin/login.php" class="btn btn-accent" style="padding:0.25rem 0.75rem;font-size:0.72rem;"><?= __('admin_panel') ?></a>
         </div>
     </div>
 </div>
