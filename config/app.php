@@ -159,11 +159,11 @@ function processArticleTranslations($article) {
     return $article;
 }
 
-// Fetch Articles from JSON
-function getArticles($limit = 10, $category = null, $search = null) {
+// Fetch Articles from JSON with Pagination
+function getArticles($limit = 10, $category = null, $search = null, $page = 1) {
     $news = getLocalNews();
-    if ($category) {
-        $news = array_filter($news, fn($a) => $a['category'] === $category);
+    if ($category && $category !== 'all') {
+        $news = array_filter($news, fn($a) => ($a['category'] ?? '') === $category);
     }
     if ($search) {
         $search = strtolower($search);
@@ -173,9 +173,32 @@ function getArticles($limit = 10, $category = null, $search = null) {
                    str_contains(strtolower($a['title_hi'] ?? ''), $search);
         });
     }
+    
+    // Sort by date descending
     usort($news, fn($a, $b) => strtotime($b['published_at'] ?? 'now') <=> strtotime($a['published_at'] ?? 'now'));
-    $limited = array_slice($news, 0, (int)$limit);
+    
+    // Pagination offset
+    $offset = ((int)$page - 1) * (int)$limit;
+    $limited = array_slice($news, $offset, (int)$limit);
+    
     return array_map('processArticleTranslations', $limited);
+}
+
+// Get total count for pagination
+function getTotalArticlesCount($category = null, $search = null) {
+    $news = getLocalNews();
+    if ($category && $category !== 'all') {
+        $news = array_filter($news, fn($a) => ($a['category'] ?? '') === $category);
+    }
+    if ($search) {
+        $search = strtolower($search);
+        $news = array_filter($news, function($a) use ($search) {
+            return str_contains(strtolower($a['title_en'] ?? ''), $search) || 
+                   str_contains(strtolower($a['title_kn'] ?? ''), $search) || 
+                   str_contains(strtolower($a['title_hi'] ?? ''), $search);
+        });
+    }
+    return count($news);
 }
 
 function getDummyArticles($limit = 10, $category = null, $search = null) {
