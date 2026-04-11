@@ -28,6 +28,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
     $title_field = "title_{$input_lang}";
     $body_field = "body_{$input_lang}";
 
+    // Handle Image Upload
+    $imageName = '';
+    if (isset($_FILES['image']) && $_FILES['image']['error'] === 0) {
+        $ext = pathinfo($_FILES['image']['name'], PATHINFO_EXTENSION);
+        $imageName = 'news_' . time() . '_' . rand(100, 999) . '.' . $ext;
+        $target = '../assets/images/news/' . $imageName;
+        if (!is_dir('../assets/images/news/')) mkdir('../assets/images/news/', 0777, true);
+        move_uploaded_file($_FILES['image']['tmp_name'], $target);
+    }
+
     if ($_POST['action'] === 'publish_article') {
         $maxId = 0;
         foreach($news as $n) if((int)$n['id'] > $maxId) $maxId = (int)$n['id'];
@@ -36,6 +46,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
             'id' => $maxId + 1,
             'slug' => $slug . '-' . time(),
             'category' => $category,
+            'image' => $imageName,
             $title_field => $title,
             $body_field => $body,
             'author' => $author,
@@ -55,6 +66,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
                 $art[$body_field] = $body;
                 $art['category'] = $category;
                 $art['author'] = $author;
+                if ($imageName) $art['image'] = $imageName;
                 break;
             }
         }
@@ -170,18 +182,33 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
         <?php elseif ($currentPage === 'create' || $currentPage === 'edit'): 
             $editArt = null;
             if ($currentPage === 'edit' && isset($_GET['id'])) {
-                $stmt = $db->prepare("SELECT * FROM rp_articles WHERE id = ?");
-                $stmt->execute([(int)$_GET['id']]);
-                $editArt = $stmt->fetch();
+                $news = getLocalNews();
+                $id = (int)$_GET['id'];
+                foreach ($news as $n) {
+                    if ((int)$n['id'] === $id) {
+                        $editArt = $n;
+                        break;
+                    }
+                }
             }
         ?>
             <!-- Create/Edit Article Form -->
             <div class="admin-card">
                 <div class="card-header"><h2><?= $currentPage === 'edit' ? '✏️ Edit Article' : '📝 Add Articles/Post' ?></h2></div>
-                <form class="article-form" style="padding:1.5rem;" method="POST">
+                <form class="article-form" style="padding:1.5rem;" method="POST" enctype="multipart/form-data">
                     <input type="hidden" name="action" value="<?= $currentPage === 'edit' ? 'edit_article' : 'publish_article' ?>">
                     <?php if($editArt): ?><input type="hidden" name="id" value="<?= $editArt['id'] ?>"><?php endif; ?>
                     
+                    <div class="form-row">
+                        <label>Main Image *</label>
+                        <input type="file" name="image" class="form-input" accept="image/*" <?= $editArt ? '' : 'required' ?>>
+                        <?php if($editArt && !empty($editArt['image'])): ?>
+                            <div style="margin-top:0.5rem;">
+                                <img src="../assets/images/news/<?= $editArt['image'] ?>" style="height:60px;border-radius:4px;border:1px solid #ddd;">
+                                <p style="font-size:0.7rem;color:#666;">Current Image</p>
+                            </div>
+                        <?php endif; ?>
+                    </div>
                     <div class="form-row">
                         <label>Language of Input</label>
                         <div style="display:flex;gap:0.5rem;">
@@ -206,7 +233,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
                     </div>
                     <div class="form-row">
                         <label>Post Body *</label>
-                        <textarea name="body" class="form-input form-textarea" rows="15" placeholder="Write content here..." required><?= $editArt ? htmlspecialchars($editArt['body_en'] ?: ($editArt['body_kn'] ?: $editArt['body_hi'])) : '' ?></textarea>
+                        <div class="editor-toolbar">
+                            <button type="button" onclick="formatDoc('bold')"><b>B</b></button>
+                            <button type="button" onclick="formatDoc('italic')"><i>I</i></button>
+                            <span class="toolbar-sep">|</span>
+                            <button type="button" onclick="insertImage()">🖼️ Add Sub-Image</button>
+                        </div>
+                        <textarea id="articleBody" name="body" class="form-input form-textarea" rows="15" placeholder="Write content here..." required><?= $editArt ? htmlspecialchars($editArt['body_en'] ?: ($editArt['body_kn'] ?: $editArt['body_hi'])) : '' ?></textarea>
                     </div>
                     <div style="display:flex;gap:0.75rem;margin-top:1rem;">
                         <button type="submit" class="btn btn-primary" style="background:linear-gradient(135deg,#22C55E,#16A34A);">💾 <?= $currentPage === 'edit' ? 'Update Post' : 'Publish Post' ?></button>
