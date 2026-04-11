@@ -1,7 +1,6 @@
 <?php
 /**
  * Ra. Power 28 - Application Configuration
- * ರಾ.ಪವರ್ 28 - ನಿಂಪು★ವಾರ್ತೆ
  */
 
 define('SITE_NAME', 'Ra. Power 28');
@@ -33,7 +32,7 @@ $CATEGORIES = [
     ['slug'=>'sports','en'=>'Sports','kn'=>'ಕ್ರೀಡೆ','hi'=>'खेल','icon'=>'⚽','color'=>'#4CAF50'],
     ['slug'=>'crime','en'=>'Crime','kn'=>'ಅಪರಾಧ','hi'=>'अपराध','icon'=>'🔍','color'=>'#F44336'],
     ['slug'=>'health-environment','en'=>'Health & Environment','kn'=>'ಆರೋಗ್ಯ ಮತ್ತು ಪರಿಸರ','hi'=>'स्वास्थ्य और पर्यावरण','icon'=>'🌿','color'=>'#00BCD4'],
-    ['slug'=>'country','en'=>'Country','kn'=>'ದೇಶ','hi'=>'देश','icon'=>'🇮🇳','color'=>'#FF9800'],
+    ['slug'=>'country','en'=>'Country','kn'=>'ದೇಶ','hi'=>'ದೇಶ','icon'=>'🇮🇳','color'=>'#FF9800'],
     ['slug'=>'politics','en'=>'Politics','kn'=>'ರಾಜಕೀಯ','hi'=>'राजनीति','icon'=>'🏛️','color'=>'#9C27B0'],
     ['slug'=>'state','en'=>'State','kn'=>'ರಾಜ್ಯ','hi'=>'राज्य','icon'=>'📍','color'=>'#3F51B5'],
     ['slug'=>'literature','en'=>'Literature','kn'=>'ಸಾಹಿತ್ಯ','hi'=>'साहित्य','icon'=>'📚','color'=>'#795548'],
@@ -58,91 +57,111 @@ $UI_STRINGS = [
         'home'=>'ಮುಖಪುಟ','search'=>'ಹುಡುಕಿ','breaking_news'=>'ಬ್ರೇಕಿಂಗ್ ನ್ಯೂಸ್','trending'=>'ಟ್ರೆಂಡಿಂಗ್',
         'latest'=>'ಇತ್ತೀಚಿನ ಸುದ್ದಿ','read_more'=>'ಮತ್ತಷ್ಟು ಓದಿ','see_all'=>'ಎಲ್ಲಾ ನೋಡಿ','share'=>'ಹಂಚಿಕೊಳ್ಳಿ',
         'about'=>'ನಮ್ಮ ಬಗ್ಗೆ','contact'=>'ಸಂಪರ್ಕಿಸಿ','privacy'=>'ಗೌಪ್ಯತಾ ನೀತಿ','terms'=>'ನಿಯಮಗಳು',
-        'subscribe'=>'ಚಂದಾದಾರರಾಗಿ','published'=>'ಪ್ರಕಟಿಸಲಾಗಿದೆ','author'=>'ಲೇಖಕ','views'=>'ವೀಕ್ಷಣೆಗಳು',
-        'related'=>'ಸಂಬಂಧಿತ ಸುದ್ದಿ','most_read'=>'ಹೆಚ್ಚು ಓದಲಾಗಿದೆ','search_placeholder'=>'ಸುದ್ದಿ ಹುಡುಕಿ...',
-        'categories'=>'ವಿಭಾಗಗಳು','follow_us'=>'ನಮ್ಮನ್ನು ಅನುಸರಿಸಿ','copyright'=>'ಎಲ್ಲ ಹಕ್ಕುಗಳು ಕಾಯ್ದಿರಿಸಲಾಗಿದೆ',
-        'min_read'=>'ನಿಮಿಷ ಓದು','back_to_home'=>'ಮುಖಪುಟಕ್ಕೆ ಹಿಂತಿರುಗಿ','no_results'=>'ಯಾವುದೇ ಫಲಿತಾಂಶ ಕಂಡುಬಂದಿಲ್ಲ',
-        'load_more'=>'ಇನ್ನಷ್ಟು ಲೋಡ್ ಮಾಡಿ','daily_horoscope'=>'ದಿನದ ರಾಶಿ ಭವಿಷ್ಯ',
-        'admin_panel'=>'ನಿರ್ವಾಹಕ ಫಲಕ','language'=>'ಭಾಷೆ',
+        'subscribe'=>'ಚಂದಾದಾರರಾಗಿ','published'=>'ಪ್ರಕಟಿತ','author'=>'ಲೇಖಕರು','views'=>'ವೀಕ್ಷಣೆಗಳು',
+        'related'=>'ಸಂಬಂಧಿತ ಸುದ್ದಿ','most_read'=>'ಹೆಚ್ಚು ಓದಿದ','search_placeholder'=>'ಸುದ್ದಿ ಹುಡುಕಿ...',
+        'categories'=>'ವರ್ಗಗಳು','follow_us'=>'ನಮ್ಮನ್ನು ಅನುಸರಿಸಿ','copyright'=>'ಎಲ್ಲಾ ಹಕ್ಕುಗಳನ್ನು ಕಾಯ್ದಿರಿಸಲಾಗಿದೆ',
+        'min_read'=>'ನಿಮಿಷ ಓದು','back_to_home'=>'ಮುಖಪುಟಕ್ಕೆ ಹಿಂತಿರುಗಿ','no_results'=>'ಯಾವುದೇ ಫಲಿತಾಂಶಗಳಿಲ್ಲ',
+        'load_more'=>'ಇನ್ನಷ್ಟು ಲೋಡ್ ಮಾಡಿ','daily_horoscope'=>'ದಿನ ಭವಿಷ್ಯ',
+        'admin_panel'=>'ನಿರ್ವಹಣಾ ಫಲಕ','language'=>'ಭಾಷೆ',
     ],
     'hi' => [
-        'home'=>'होम','search'=>'खोजें','breaking_news'=>'ब्रेकिंग न्यूज़','trending'=>'ट्रेंडिंग',
-        'latest'=>'ताज़ा खबरें','read_more'=>'और पढ़ें','see_all'=>'सब देखें','share'=>'शेयर करें',
-        'about'=>'हमारे बारे में','contact'=>'संपर्क','privacy'=>'गोपनीयता नीति','terms'=>'शर्तें',
-        'subscribe'=>'सदस्यता लें','published'=>'प्रकाशित','author'=>'लेखक','views'=>'दृश्य',
-        'related'=>'संबंधित समाचार','most_read'=>'सबसे ज़्यादा पढ़ा गया','search_placeholder'=>'समाचार खोजें...',
-        'categories'=>'श्रेणियाँ','follow_us'=>'हमें फॉलो करें','copyright'=>'सर्वाधिकार सुरक्षित',
-        'min_read'=>'मिनट पढ़ें','back_to_home'=>'होम पर वापस','no_results'=>'कोई परिणाम नहीं मिला',
+        'home'=>'मुख्यपृष्ठ','search'=>'खोजें','breaking_news'=>'ब्रेकिंग न्यूज़','trending'=>'ट्रेंडिंग',
+        'latest'=>'नवीनतम समाचार','read_more'=>'और पढ़ें','see_all'=>'सभी देखें','share'=>'शेयर करें',
+        'about'=>'हमारे बारे में','contact'=>'संपर्क करें','privacy'=>'गोपनीयता नीति','terms'=>'नियम और शर्तें',
+        'subscribe'=>'सब्सक्राइब करें','published'=>'प्रकाशित','author'=>'लेखक','views'=>'व्यूज',
+        'related'=>'संबंधित समाचार','most_read'=>'सबसे ज्यादा पढ़ा गया','search_placeholder'=>'खबरें खोजें...',
+        'categories'=>'श्रेणियां','follow_us'=>'हमें फॉलो करें','copyright'=>'सर्वाधिकार सुरक्षित',
+        'min_read'=>'मिनट पढ़ें','back_to_home'=>'मुख्यपृष्ठ पर वापस','no_results'=>'कोई परिणाम नहीं मिला',
         'load_more'=>'और लोड करें','daily_horoscope'=>'दैनिक राशिफल',
         'admin_panel'=>'एडमिन पैनल','language'=>'भाषा',
-    ],
+    ]
 ];
 
-// Helper: get translated string
 function __($key) {
     global $UI_STRINGS, $CURRENT_LANG;
     return $UI_STRINGS[$CURRENT_LANG][$key] ?? $UI_STRINGS['en'][$key] ?? $key;
 }
 
-// Helper: get category name in current lang
 function getCatName($cat) {
     global $CURRENT_LANG;
     return $cat[$CURRENT_LANG] ?? $cat['en'];
 }
 
-require_once __DIR__ . '/db.php';
-
-
 // Online Auto-Translate via API
 function autoTranslate($text, $sourceLang, $targetLang) {
     if (empty(trim(strip_tags($text))) || $sourceLang === $targetLang) return $text;
-
-    $url = "https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=$targetLang&dt=t&q=" . urlencode(substr($text, 0, 4000));
-    $response = @file_get_contents($url);
+    
+    $url = "https://translate.googleapis.com/translate_a/single?client=gtx&sl=" . $sourceLang . "&tl=" . $targetLang . "&dt=t&q=" . urlencode($text);
+    
+    $ch = curl_init();
+    curl_setopt($ch, CURLOPT_URL, $url);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+    curl_setopt($ch, CURLOPT_TIMEOUT, 5);
+    $response = curl_exec($ch);
+    curl_close($ch);
+    
     if ($response) {
         $result = json_decode($response, true);
         if (isset($result[0])) {
-            $translated = '';
-            foreach ($result[0] as $parts) {
-                $translated .= $parts[0] ?? '';
+            $translatedText = "";
+            foreach ($result[0] as $part) {
+                $translatedText .= $part[0];
             }
-            return $translated;
+            return $translatedText;
         }
     }
     return $text;
 }
 
-// Ensure translation exists and return mapped article
+// Load News from Local JSON
+function getLocalNews() {
+    $path = BASE_PATH . '/data/news.json';
+    if (!file_exists($path)) return [];
+    return json_decode(file_get_contents($path), true) ?: [];
+}
+
+// Save News to Local JSON
+function saveLocalNews($news) {
+    $path = BASE_PATH . '/data/news.json';
+    file_put_contents($path, json_encode($news, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
+}
+
+// Process single article translations and update record
 function processArticleTranslations($article) {
     global $CURRENT_LANG;
-    if (!$article) return null;
+    $fields = ['title', 'body'];
+    $sourceLang = 'en'; // Default source
     
-    // Determine source language (first one with content)
-    $sourceLang = 'en';
+    // Detect source language
     if (!empty($article['title_kn'])) $sourceLang = 'kn';
     elseif (!empty($article['title_hi'])) $sourceLang = 'hi';
+    elseif (!empty($article['title_en'])) $sourceLang = 'en';
 
-    foreach (['title', 'body'] as $field) {
+    $updated = false;
+    foreach ($fields as $field) {
         $langField = "{$field}_{$CURRENT_LANG}";
         
-        // If content in desired language is missing, translate from source
-        if (empty(trim($article[$langField]))) {
+        if (empty($article[$langField]) && !empty($article["{$field}_{$sourceLang}"])) {
             $translated = autoTranslate($article["{$field}_{$sourceLang}"], $sourceLang, $CURRENT_LANG);
             $article[$langField] = $translated;
             
-            // Save translation back to DB asynchronously
             if (!empty(trim(strip_tags($translated)))) {
-                try {
-                    $stmt = getDB()->prepare("UPDATE rp_articles SET $langField = ? WHERE id = ?");
-                    $stmt->execute([$translated, $article['id']]);
-                } catch (Exception $e) {}
+                $updated = true;
             }
         }
         
-        $article[$field] = $article[$langField];
-        $article["{$field}_en"] = $article["{$field}_en"] ?? $article["{$field}_kn"]; 
-        $article["{$field}_kn"] = $article["{$field}_kn"];
-        $article["{$field}_hi"] = $article["{$field}_hi"] ?? $article["{$field}_kn"];
+        $article[$field] = $article[$langField] ?: ($article["{$field}_en"] ?: ($article["{$field}_kn"] ?: $article["{$field}_hi"]));
+    }
+
+    if ($updated) {
+        $news = getLocalNews();
+        foreach ($news as &$n) {
+            if ($n['id'] == $article['id']) {
+                $n = $article;
+                break;
+            }
+        }
+        saveLocalNews($news);
     }
 
     $article['read_time'] = ceil(str_word_count(strip_tags($article['body'])) / 200) ?: 1;
@@ -150,145 +169,62 @@ function processArticleTranslations($article) {
     return $article;
 }
 
-// Fetch Articles from Database + Legacy JSON
+// Fetch Articles from JSON
 function getArticles($limit = 10, $category = null, $search = null) {
-    $dbArticles = [];
-    try {
-        $db = getDB();
-        $query = "SELECT * FROM rp_articles WHERE 1=1";
-        $params = [];
+    $news = getLocalNews();
 
-        if ($category) {
-            $query .= " AND category = ?";
-            $params[] = $category;
-        }
-
-        if ($search) {
-            $query .= " AND (title_kn LIKE ? OR title_en LIKE ? OR title_hi LIKE ?)";
-            $params[] = "%$search%";
-            $params[] = "%$search%";
-            $params[] = "%$search%";
-        }
-
-        $query .= " ORDER BY published_at DESC LIMIT " . (int)$limit;
-        $stmt = $db->prepare($query);
-        $stmt->execute($params);
-        $dbArticles = $stmt->fetchAll() ?: [];
-    } catch (Exception $e) {}
-
-    // Load Legacy Data
-    $legacyArticles = [];
-    $jsonPath = BASE_PATH . '/data/legacy_articles.json';
-    if (file_exists($jsonPath)) {
-        $legacyArticles = json_decode(file_get_contents($jsonPath), true) ?: [];
-    }
-
-    // Apply filters to legacy data
     if ($category) {
-        $legacyArticles = array_filter($legacyArticles, fn($a) => $a['category'] === $category);
+        $news = array_filter($news, fn($a) => $a['category'] === $category);
     }
+
     if ($search) {
         $search = strtolower($search);
-        $legacyArticles = array_filter($legacyArticles, function($a) use ($search) {
+        $news = array_filter($news, function($a) use ($search) {
             return str_contains(strtolower($a['title_en'] ?? ''), $search) || 
                    str_contains(strtolower($a['title_kn'] ?? ''), $search) || 
                    str_contains(strtolower($a['title_hi'] ?? ''), $search);
         });
     }
 
-    // Merge and Sort
-    $allArticles = array_merge($dbArticles, $legacyArticles);
-    usort($allArticles, fn($a, $b) => strtotime($b['published_at']) <=> strtotime($a['published_at']));
-    
-    // Process translations and apply final limit
-    $limited = array_slice($allArticles, 0, (int)$limit);
+    usort($news, fn($a, $b) => strtotime($b['published_at']) <=> strtotime($a['published_at']));
+    $limited = array_slice($news, 0, (int)$limit);
     return array_map('processArticleTranslations', $limited);
 }
 
-// Keep old function name for compatibility or alias it
 function getDummyArticles($limit = 10, $category = null, $search = null) {
     return getArticles($limit, $category, $search);
 }
 
-
 // Get single article by slug
 function getArticleBySlug($slug) {
-    try {
-        $db = getDB();
-        $stmt = $db->prepare("SELECT * FROM rp_articles WHERE slug = ?");
-        $stmt->execute([$slug]);
-        $article = $stmt->fetch();
-        if ($article) {
+    $news = getLocalNews();
+    foreach ($news as $article) {
+        if ($article['slug'] === $slug) {
             return processArticleTranslations($article);
         }
-    } catch (Exception $e) {
-        // Log error
     }
-    
     return null;
 }
 
-
 // Breaking news items: gets the latest news from EACH category
 function getBreakingNews() {
-    global $CURRENT_LANG, $CATEGORIES;
+    $news = getLocalNews();
+    $items = [];
+
+    foreach ($GLOBALS['CATEGORIES'] as $cat) {
+        $catNews = array_filter($news, fn($a) => $a['category'] === $cat['slug']);
+        if (!empty($catNews)) {
+            usort($catNews, fn($a, $b) => strtotime($b['published_at']) <=> strtotime($a['published_at']));
+            $items[] = reset($catNews);
+        }
+    }
+    
+    usort($items, fn($a, $b) => strtotime($b['published_at']) <=> strtotime($a['published_at']));
+    
     $breaking = [];
-
-    try {
-        $db = getDB();
-        
-        // Fetch the latest article from each category (DB + Legacy)
-        $items = [];
-        $legacyPath = BASE_PATH . '/data/legacy_articles.json';
-        $legacyData = file_exists($legacyPath) ? json_decode(file_get_contents($legacyPath), true) : [];
-
-        foreach ($CATEGORIES as $cat) {
-            // Try DB first
-            $stmt = $db->prepare("SELECT * FROM rp_articles WHERE category = ? ORDER BY published_at DESC LIMIT 1");
-            $stmt->execute([$cat['slug']]);
-            $item = $stmt->fetch();
-            
-            if (!$item) {
-                // Try Legacy JSON
-                $catLegacy = array_filter($legacyData, fn($a) => $a['category'] === $cat['slug']);
-                if (!empty($catLegacy)) {
-                    usort($catLegacy, fn($a, $b) => strtotime($b['published_at']) <=> strtotime($a['published_at']));
-                    $item = reset($catLegacy);
-                }
-            }
-
-            if ($item) {
-                $items[] = $item;
-            }
-        }
-        
-        // Sort items by published_at DESC to show most recent first
-        usort($items, fn($a, $b) => strtotime($b['published_at']) <=> strtotime($a['published_at']));
-        
-        foreach ($items as $item) {
-            $field = "title_{$CURRENT_LANG}";
-            if (empty(trim($item[$field]))) {
-                // Determine source language
-                $sourceLang = 'en';
-                if (!empty($item['title_kn'])) $sourceLang = 'kn';
-                elseif (!empty($item['title_hi'])) $sourceLang = 'hi';
-
-                $translated = autoTranslate($item["title_{$sourceLang}"], $sourceLang, $CURRENT_LANG);
-                $breaking[] = $translated;
-                
-                if (!empty(trim($translated))) {
-                    try {
-                        $upd = $db->prepare("UPDATE rp_articles SET $field = ? WHERE id = ?");
-                        $upd->execute([$translated, $item['id']]);
-                    } catch (Exception $e) {}
-                }
-            } else {
-                $breaking[] = $item[$field];
-            }
-        }
-
-    } catch (Exception $e) {
-        // Log error
+    foreach ($items as $item) {
+        $processed = processArticleTranslations($item);
+        $breaking[] = $processed['title'];
     }
 
     if (empty($breaking)) {
@@ -297,7 +233,6 @@ function getBreakingNews() {
     return $breaking;
 }
 
-
 // Horoscope data
 function getHoroscope() {
     return [
@@ -305,7 +240,7 @@ function getHoroscope() {
         ['sign'=>'Taurus','kn'=>'ವೃಷಭ','hi'=>'वृषभ','icon'=>'♉','text_en'=>'Focus on health today. Avoid unnecessary travel.','text_kn'=>'ಇಂದು ಆರೋಗ್ಯದ ಮೇಲೆ ಗಮನ ಕೊಡಿ.','text_hi'=>'आज स्वास्थ्य पर ध्यान दें।'],
         ['sign'=>'Gemini','kn'=>'ಮಿಥುನ','hi'=>'मिथुन','icon'=>'♊','text_en'=>'Good day for business decisions. Stars favor new ventures.','text_kn'=>'ವ್ಯಾಪಾರ ನಿರ್ಧಾರಗಳಿಗೆ ಉತ್ತಮ ದಿನ.','text_hi'=>'व्यापार के फैसलों के लिए अच्छा दिन।'],
         ['sign'=>'Cancer','kn'=>'ಕರ್ಕ','hi'=>'कर्क','icon'=>'♋','text_en'=>'Family matters need attention. Stay calm and patient.','text_kn'=>'ಕುಟುಂಬದ ವಿಷಯಗಳಿಗೆ ಗಮನ ಬೇಕು.','text_hi'=>'पारिवारिक मामलों पर ध्यान दें।'],
-        ['sign'=>'Leo','kn'=>'ಸಿಂಹ','hi'=>'सिंह','icon'=>'♌','text_en'=>'Career growth opportunities ahead. Be prepared.','text_kn'=>'ವೃತ್ತಿ ಬೆಳವಣಿಗೆಯ ಅವಕಾಶಗಳು ಮುಂದಿವೆ.','text_hi'=>'करियर में तरक्की के अवसर आगे हैं।'],
+        ['sign'=>'Leo','kn'=>'ಸಿಂಹ','hi'=>'सिंह','icon'=>'♌','text_en'=>'Career growth opportunities ahead. Be prepared.','text_kn'=>'ವತ್ತಿ ಬೆಳವಣಿಗೆಯ ಅವಕಾಶಗಳು ಮುಂದಿವೆ.','text_hi'=>'करियर में तरक्की के अवसर आगे हैं।'],
         ['sign'=>'Virgo','kn'=>'ಕನ್ಯಾ','hi'=>'कन्या','icon'=>'♍','text_en'=>'A day of creative inspiration. Express yourself.','text_kn'=>'ಸೃಜನಶೀಲ ಸ್ಫೂರ್ತಿಯ ದಿನ.','text_hi'=>'रचनात्मक प्रेरणा का दिन।'],
     ];
 }

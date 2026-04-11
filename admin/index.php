@@ -5,44 +5,61 @@ require_once '../config/app.php';
 
 $currentPage = $_GET['p'] ?? 'dashboard';
 $message = '';
-$db = getDB();
 
 // Handle Article Actions (Delete)
 if (isset($_GET['delete_id'])) {
-    try {
-        $stmt = $db->prepare("DELETE FROM rp_articles WHERE id = ?");
-        $stmt->execute([(int)$_GET['delete_id']]);
-        $message = '<div class="alert alert-success" style="background:#dcfce7;color:#166534;padding:1rem;margin-bottom:1rem;border-radius:8px;border:1px solid #bbf7d0;">🗑️ Article deleted successfully!</div>';
-    } catch (Exception $e) {
-        $message = '<div class="alert alert-error" style="background:#fee2e2;color:#991b1b;padding:1rem;margin-bottom:1rem;border-radius:8px;border:1px solid #fecaca;">❌ Delete error: ' . $e->getMessage() . '</div>';
-    }
+    $news = getLocalNews();
+    $id = (int)$_GET['delete_id'];
+    $news = array_filter($news, fn($a) => (int)$a['id'] !== $id);
+    saveLocalNews($news);
+    $message = '<div class="alert alert-success">🗑️ Article deleted successfully!</div>';
 }
 
 // Handle Article Submission (Create/Edit)
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
-    try {
-        $title = $_POST['title'];
-        $body = $_POST['body'];
-        $category = $_POST['category'];
-        $input_lang = $_POST['input_lang'] ?? 'en';
-        $author = $_POST['author'] ?: 'Admin';
-        $slug = strtolower(trim(preg_replace('/[^A-Za-z0-9-]+/', '-', $title)));
-        
-        $title_field = "title_{$input_lang}";
-        $body_field = "body_{$input_lang}";
+    $news = getLocalNews();
+    $title = $_POST['title'];
+    $body = $_POST['body'];
+    $category = $_POST['category'];
+    $input_lang = $_POST['input_lang'] ?? 'en';
+    $author = $_POST['author'] ?: 'Admin';
+    $slug = strtolower(trim(preg_replace('/[^A-Za-z0-9-]+/', '-', $title)));
+    
+    $title_field = "title_{$input_lang}";
+    $body_field = "body_{$input_lang}";
 
-        if ($_POST['action'] === 'publish_article') {
-            $stmt = $db->prepare("INSERT INTO rp_articles (slug, category, $title_field, $body_field, author, published_at) VALUES (?, ?, ?, ?, ?, NOW())");
-            $stmt->execute([$slug, $category, $title, $body, $author]);
-            $message = '<div class="alert alert-success" style="background:#dcfce7;color:#166534;padding:1rem;margin-bottom:1rem;border-radius:8px;border:1px solid #bbf7d0;">🚀 Article published successfully!</div>';
-        } elseif ($_POST['action'] === 'edit_article') {
-            $id = (int)$_POST['id'];
-            $stmt = $db->prepare("UPDATE rp_articles SET $title_field = ?, $body_field = ?, category = ?, author = ? WHERE id = ?");
-            $stmt->execute([$title, $body, $category, $author, $id]);
-            $message = '<div class="alert alert-success" style="background:#dcfce7;color:#166534;padding:1rem;margin-bottom:1rem;border-radius:8px;border:1px solid #bbf7d0;">📝 Article updated successfully!</div>';
+    if ($_POST['action'] === 'publish_article') {
+        $maxId = 0;
+        foreach($news as $n) if((int)$n['id'] > $maxId) $maxId = (int)$n['id'];
+        
+        $newArticle = [
+            'id' => $maxId + 1,
+            'slug' => $slug . '-' . time(),
+            'category' => $category,
+            $title_field => $title,
+            $body_field => $body,
+            'author' => $author,
+            'views' => 0,
+            'published_at' => date('Y-m-d H:i:s'),
+            'is_featured' => 0,
+            'is_breaking' => 0
+        ];
+        $news[] = $newArticle;
+        saveLocalNews($news);
+        $message = '<div class="alert alert-success">🚀 Article published successfully!</div>';
+    } elseif ($_POST['action'] === 'edit_article') {
+        $id = (int)$_POST['id'];
+        foreach ($news as &$art) {
+            if ((int)$art['id'] === $id) {
+                $art[$title_field] = $title;
+                $art[$body_field] = $body;
+                $art['category'] = $category;
+                $art['author'] = $author;
+                break;
+            }
         }
-    } catch (Exception $e) {
-        $message = '<div class="alert alert-error" style="background:#fee2e2;color:#991b1b;padding:1rem;margin-bottom:1rem;border-radius:8px;border:1px solid #fecaca;">❌ Operation error: ' . $e->getMessage() . '</div>';
+        saveLocalNews($news);
+        $message = '<div class="alert alert-success">📝 Article updated successfully!</div>';
     }
 }
 ?>
@@ -91,9 +108,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
         <div class="admin-content">
         <?= $message ?>
         <?php if ($currentPage === 'dashboard'): 
-            $db = getDB();
-            $totalArticles = $db->query("SELECT COUNT(*) FROM rp_articles")->fetchColumn();
-            $totalViews = $db->query("SELECT SUM(views) FROM rp_articles")->fetchColumn() ?: 0;
+            $news = getLocalNews();
+            $totalArticles = count($news);
+            $totalViews = array_sum(array_column($news, 'views'));
             $totalCategories = count($CATEGORIES);
         ?>
             <!-- Dashboard Stats -->
@@ -123,7 +140,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
                     <thead><tr><th>Title</th><th>Category</th><th>Author</th><th>Date</th><th>Views</th><th>Status</th></tr></thead>
                     <tbody>
                         <?php
-                        $recent = $db->query("SELECT * FROM rp_articles ORDER BY published_at DESC LIMIT 5")->fetchAll();
+                        $recent = getArticles(5);
                         foreach ($recent as $art):
                             $title = $art['title_en'] ?: ($art['title_kn'] ?: $art['title_hi']);
                         ?>
@@ -210,7 +227,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
                     <thead><tr><th>Title</th><th>Category</th><th>Author</th><th>Date</th><th>Actions</th></tr></thead>
                     <tbody>
                         <?php
-                        $list = $db->query("SELECT * FROM rp_articles ORDER BY published_at DESC")->fetchAll();
+                        $list = getArticles(100);
                         foreach ($list as $art):
                             $title = $art['title_en'] ?: ($art['title_kn'] ?: $art['title_hi']);
                         ?>
