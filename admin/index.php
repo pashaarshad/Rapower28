@@ -304,6 +304,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
         </div>
     </main>
 </div>
-<script src="assets/admin.js"></script>
+<script src="assets/admin.js?v=<?= time() ?>"></script>
 </body>
 </html>
