@@ -11,15 +11,6 @@ document.addEventListener('DOMContentLoaded', () => {
         imageUpload.addEventListener('change', () => { if (imageUpload.files.length) uploadZone.innerHTML = '<p>✅ ' + imageUpload.files[0].name + ' selected</p>'; });
     }
 
-    // Form validation
-    const form = document.querySelector('.article-form');
-    if (form) {
-        form.addEventListener('submit', (e) => {
-            e.preventDefault();
-            alert('Article published successfully! (Demo mode — no database connected)');
-        });
-    }
-
     // Editor toolbar buttons (demo)
     document.querySelectorAll('.editor-toolbar button').forEach(btn => {
         btn.addEventListener('click', (e) => { e.preventDefault(); btn.style.background = '#E8F4F8'; setTimeout(() => btn.style.background = '', 300); });

@@ -90,15 +90,8 @@ function getCatName($cat) {
     return $cat[$CURRENT_LANG] ?? $cat['en'];
 }
 
-// Database Connection
-function getDB() {
-    static $pdo = null;
-    if ($pdo === null) {
-        $pdo = new PDO("mysql:host=127.0.0.1;dbname=rapower28;charset=utf8mb4", 'root', 'root');
-        $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-    }
-    return $pdo;
-}
+require_once __DIR__ . '/db.php';
+
 
 // Online Auto-Translate via API
 function autoTranslate($text, $targetLang) {
@@ -153,63 +146,76 @@ function processArticleTranslations($article) {
     return $article;
 }
 
-// Fetch Articles from Database (replaces getDummyArticles)
-function getDummyArticles($limit = 10, $category = null, $search = null) {
-    // 1. Fetch default static articles from local JSON file
-    $articles = [];
-    $jsonPath = BASE_PATH . '/data/articles.json';
-    if (file_exists($jsonPath)) {
-        $articles = json_decode(file_get_contents($jsonPath), true) ?: [];
+// Fetch Articles from Database
+function getArticles($limit = 10, $category = null, $search = null) {
+    try {
+        $db = getDB();
+        $query = "SELECT * FROM rp_articles WHERE 1=1";
+        $params = [];
+
+        if ($category) {
+            $query .= " AND category = ?";
+            $params[] = $category;
+        }
+
+        if ($search) {
+            $query .= " AND (title_kn LIKE ? OR title_en LIKE ?)";
+            $params[] = "%$search%";
+            $params[] = "%$search%";
+        }
+
+        $query .= " ORDER BY published_at DESC LIMIT " . (int)$limit;
+        $stmt = $db->prepare($query);
+        $stmt->execute($params);
+        $articles = $stmt->fetchAll();
+
+        if ($articles) {
+            return array_map('processArticleTranslations', $articles);
+        }
+    } catch (Exception $e) {
+        // Log error if needed: error_log($e->getMessage());
     }
 
-    // 2. Filter the articles
-    if ($category) {
-        $articles = array_filter($articles, fn($a) => $a['category'] === $category);
-    }
-    if ($search) {
-        $search = strtolower($search);
-        $articles = array_filter($articles, function($a) use ($search) {
-            return str_contains(strtolower($a['title_kn']), $search) || str_contains(strtolower($a['title_en'] ?? ''), $search);
-        });
-    }
-
-    // 3. Sort by date and apply limit
-    usort($articles, fn($a, $b) => strtotime($b['published_at']) <=> strtotime($a['published_at']));
-    $articles = array_slice($articles, 0, (int)$limit);
-
-    return array_map('processArticleTranslations', $articles);
+    return [];
 }
+
+// Keep old function name for compatibility or alias it
+function getDummyArticles($limit = 10, $category = null, $search = null) {
+    return getArticles($limit, $category, $search);
+}
+
 
 // Get single article by slug
 function getArticleBySlug($slug) {
-    // Read from default static JSON
-    $articles = [];
-    $jsonPath = BASE_PATH . '/data/articles.json';
-    if (file_exists($jsonPath)) {
-        $articles = json_decode(file_get_contents($jsonPath), true) ?: [];
-    }
-    
-    foreach ($articles as $article) {
-        if ($article['slug'] === $slug) {
+    try {
+        $db = getDB();
+        $stmt = $db->prepare("SELECT * FROM rp_articles WHERE slug = ?");
+        $stmt->execute([$slug]);
+        $article = $stmt->fetch();
+        if ($article) {
             return processArticleTranslations($article);
         }
+    } catch (Exception $e) {
+        // Log error
     }
     
     return null;
 }
 
+
 // Breaking news items dynamically fetched and translated
 function getBreakingNews() {
     global $CURRENT_LANG;
-    $articles = [];
-    $jsonPath = BASE_PATH . '/data/articles.json';
-    if (file_exists($jsonPath)) {
-        $articles = json_decode(file_get_contents($jsonPath), true) ?: [];
+    $items = [];
+
+    try {
+        $db = getDB();
+        $stmt = $db->query("SELECT * FROM rp_articles WHERE is_breaking = 1 ORDER BY published_at DESC LIMIT 5");
+        $items = $stmt->fetchAll();
+    } catch (Exception $e) {
+        // Error handling
     }
 
-    $breaking_articles = array_filter($articles, fn($a) => !empty($a['is_breaking']));
-    usort($breaking_articles, fn($a, $b) => strtotime($b['published_at']) <=> strtotime($a['published_at']));
-    $items = array_slice($breaking_articles, 0, 5);
     
     $breaking = [];
     foreach ($items as $item) {
