@@ -212,7 +212,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
             <!-- Create/Edit Article Form -->
             <div class="admin-card">
                 <div class="card-header"><h2><?= $currentPage === 'edit' ? '✏️ Edit Article' : '📝 Add Articles/Post' ?></h2></div>
-                <form class="article-form" style="padding:1.5rem;" method="POST" enctype="multipart/form-data">
+                <form method="POST" enctype="multipart/form-data" class="animate-fadeInUp" onsubmit="document.getElementById('articleBodyHidden').value = document.getElementById('articleBody').innerHTML">
                     <input type="hidden" name="action" value="<?= $currentPage === 'edit' ? 'edit_article' : 'publish_article' ?>">
                     <?php if($editArt): ?><input type="hidden" name="id" value="<?= $editArt['id'] ?>"><?php endif; ?>
                     
@@ -254,14 +254,29 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
                     </div>
                     <div class="form-row">
                         <label>Post Body *</label>
+                        <style>
+                            .toolbar-btn {
+                                background: #fff; border: 1px solid #cbd5e1; border-radius: 4px; padding: 4px 10px; cursor: pointer; color: #334155; transition: all 0.2s;
+                            }
+                            .toolbar-btn:hover {
+                                background: #f1f5f9; border-color: #94a3b8;
+                            }
+                            .toolbar-btn.active {
+                                background: #e0e7ff; border-color: #6366f1; color: #4f46e5;
+                            }
+                            .editor-toolbar {
+                                background: #f8fafc; padding: 0.75rem; border: 1px solid #e2e8f0; border-bottom: none; border-radius: 8px 8px 0 0; display: flex; align-items: center; gap: 0.5rem;
+                            }
+                        </style>
                         <div class="editor-toolbar">
-                            <button type="button" onclick="formatDoc('bold')"><b>B</b></button>
-                            <button type="button" onclick="formatDoc('italic')"><i>I</i></button>
-                            <span class="toolbar-sep">|</span>
-                            <button type="button" onclick="document.getElementById('subImageInput').click()">🖼️ Upload & Insert Image</button>
+                            <button type="button" class="toolbar-btn btn-bold" onclick="formatDoc('bold')" style="font-weight:bold;">B</button>
+                            <button type="button" class="toolbar-btn btn-italic" onclick="formatDoc('italic')" style="font-style:italic;">I</button>
+                            <span class="toolbar-sep" style="color:#94a3b8;margin:0 5px;">|</span>
+                            <button type="button" class="toolbar-btn" onclick="document.getElementById('subImageInput').click()">🖼️ Upload & Insert Image</button>
                             <input type="file" id="subImageInput" style="display:none;" onchange="uploadSubImage(this)">
                         </div>
-                        <textarea id="articleBody" name="body" class="form-input form-textarea" rows="15" placeholder="Write content here..." required><?= $editArt ? htmlspecialchars($editArt['body_en'] ?: ($editArt['body_kn'] ?: $editArt['body_hi'])) : '' ?></textarea>
+                        <div id="articleBody" class="form-input" contenteditable="true" style="min-height: 350px; border-radius: 0 0 8px 8px; background: #fff; overflow-y: auto; outline: none; padding: 1rem;"><?= $editArt ? htmlspecialchars_decode($editArt['body_en'] ?: ($editArt['body_kn'] ?: $editArt['body_hi'])) : '' ?></div>
+                        <textarea id="articleBodyHidden" name="body" style="display:none;"><?= $editArt ? htmlspecialchars($editArt['body_en'] ?: ($editArt['body_kn'] ?: $editArt['body_hi'])) : '' ?></textarea>
                     </div>
                     <div style="display:flex;gap:0.75rem;margin-top:1rem;">
                         <button type="submit" class="btn btn-primary" style="background:linear-gradient(135deg,#22C55E,#16A34A);">💾 <?= $currentPage === 'edit' ? 'Update Post' : 'Publish Post' ?></button>

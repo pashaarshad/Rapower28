@@ -1,24 +1,13 @@
 // Admin Panel JavaScript
 function formatDoc(command) {
-    const textarea = document.getElementById('articleBody');
-    if (!textarea) return;
-    
-    const start = textarea.selectionStart;
-    const end = textarea.selectionEnd;
-    const selectedText = textarea.value.substring(start, end);
-    let newText = '';
-
-    if (command === 'bold') newText = `<strong>${selectedText}</strong>`;
-    else if (command === 'italic') newText = `<em>${selectedText}</em>`;
-
-    textarea.setRangeText(newText, start, end, 'select');
-    textarea.focus();
+    document.execCommand(command, false, null);
+    const editor = document.getElementById('articleBody');
+    if (editor) editor.focus();
 }
 
 async function uploadSubImage(input) {
     if (!input.files || !input.files[0]) return;
     
-    const textarea = document.getElementById('articleBody');
     const formData = new FormData();
     formData.append('ajax_action', 'sub_image_upload');
     formData.append('sub_image', input.files[0]);
@@ -28,10 +17,13 @@ async function uploadSubImage(input) {
         const data = await response.json();
         
         if (data.success) {
-            const imgTag = `\n<figure class="article-figure"><img src="assets/images/news/${data.filename}" alt="Image"></figure>\n`;
-            const start = textarea.selectionStart;
-            textarea.setRangeText(imgTag, start, start, 'end');
-            textarea.focus();
+            // Insert the image into the WYSIWYG editor
+            const imgHtml = `<figure class="article-figure" style="max-width:100%;margin:1rem 0;text-align:center;"><img src="assets/images/news/${data.filename}" alt="Article Image" style="max-width:100%;height:auto;border-radius:8px;"></figure><p><br></p>`;
+            
+            const editor = document.getElementById('articleBody');
+            editor.focus();
+            document.execCommand('insertHTML', false, imgHtml);
+            
         } else {
             alert('Upload failed!');
         }
@@ -40,6 +32,7 @@ async function uploadSubImage(input) {
     }
     input.value = ''; // clear input
 }
+
 
 document.addEventListener('DOMContentLoaded', () => {
     // Current nav highlighting logic
