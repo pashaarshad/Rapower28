@@ -1,18 +1,21 @@
 <?php
 global $CATEGORIES, $CURRENT_LANG;
 $slug = $_GET['slug'] ?? '';
-$articles = getDummyArticles();
-$article = null;
-foreach ($articles as $a) {
-    if ($a['slug'] === $slug) { $article = $a; break; }
+$article = getArticleBySlug($slug);
+if (!$article) {
+    // If slug not found, try getting the most recent as fallback 
+    // or just use articles[0] if needed, but getArticleBySlug is the priority
+    $articles = getArticles(1);
+    $article = !empty($articles) ? $articles[0] : null;
 }
-if (!$article) $article = $articles[0]; // fallback
-incrementArticleViews($article['id']);
-$pageTitle = getArticleTitle($article);
-$artCat = array_values(array_filter($CATEGORIES, fn($c) => $c['slug'] === $article['category']));
+incrementArticleViews($article ? $article['id'] : null);
+$pageTitle = $article ? getArticleTitle($article) : 'Not Found';
+$artCat = ($article && isset($article['category'])) ? array_values(array_filter($CATEGORIES, fn($c) => $c['slug'] === $article['category'])) : [];
 $catInfo = !empty($artCat) ? $artCat[0] : null;
+
 // Related articles (different from current)
-$related = array_filter($articles, fn($a) => $a['id'] !== $article['id']);
+$allArticles = getArticles(10);
+$related = array_filter($allArticles, fn($a) => $article && $a['id'] !== $article['id']);
 $related = array_slice($related, 0, 3);
 ?>
 
