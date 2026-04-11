@@ -36,8 +36,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
     $body = $_POST['body'];
     $category = $_POST['category'];
     $input_lang = $_POST['input_lang'] ?? 'en';
-    $author = $_POST['author'] ?: 'Admin';
+    $author = $_POST['author'] ?: 'N Rajesh';
     $slug = strtolower(trim(preg_replace('/[^A-Za-z0-9-]+/', '-', $title)));
+    
+    $published_at = $_POST['published_at'] ?: date('Y-m-d H:i:s');
     
     $title_field = "title_{$input_lang}";
     $body_field = "body_{$input_lang}";
@@ -65,7 +67,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
             $body_field => $body,
             'author' => $author,
             'views' => 0,
-            'published_at' => date('Y-m-d H:i:s'),
+            'published_at' => $published_at,
             'is_featured' => 0,
             'is_breaking' => 0
         ];
@@ -81,6 +83,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
                 $art['category'] = $category;
                 $art['author'] = $author;
                 if ($imageName) $art['image'] = $imageName;
+                $art['published_at'] = $published_at;
                 break;
             }
         }
@@ -243,7 +246,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
                                 <option value="<?= $cat['slug'] ?>" <?= ($editArt && $editArt['category'] === $cat['slug']) ? 'selected' : '' ?>><?= $cat['en'] ?></option>
                             <?php endforeach; ?>
                         </select></div>
-                        <div><label>Author</label><input type="text" name="author" class="form-input" value="<?= $editArt ? htmlspecialchars($editArt['author']) : 'Admin' ?>"></div>
+                        <div><label>Author</label><input type="text" name="author" class="form-input" value="<?= $editArt ? htmlspecialchars($editArt['author']) : 'N Rajesh' ?>"></div>
+                    </div>
+                    <div class="form-row">
+                        <label>Published Date</label>
+                        <input type="datetime-local" name="published_at" class="form-input" value="<?= $editArt ? date('Y-m-d\TH:i', strtotime($editArt['published_at'])) : date('Y-m-d\TH:i') ?>">
                     </div>
                     <div class="form-row">
                         <label>Post Body *</label>
