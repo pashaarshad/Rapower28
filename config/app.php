@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 /**
  * Ra. Power 28 - Application Configuration
  */
@@ -90,16 +90,13 @@ function getCatName($cat) {
 // Online Auto-Translate via API
 function autoTranslate($text, $sourceLang, $targetLang) {
     if (empty(trim(strip_tags($text))) || $sourceLang === $targetLang) return $text;
-    
     $url = "https://translate.googleapis.com/translate_a/single?client=gtx&sl=" . $sourceLang . "&tl=" . $targetLang . "&dt=t&q=" . urlencode($text);
-    
     $ch = curl_init();
     curl_setopt($ch, CURLOPT_URL, $url);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
     curl_setopt($ch, CURLOPT_TIMEOUT, 5);
     $response = curl_exec($ch);
     curl_close($ch);
-    
     if ($response) {
         $result = json_decode($response, true);
         if (isset($result[0])) {
@@ -130,29 +127,22 @@ function saveLocalNews($news) {
 function processArticleTranslations($article) {
     global $CURRENT_LANG;
     $fields = ['title', 'body'];
-    $sourceLang = 'en'; // Default source
-    
-    // Detect source language
+    $sourceLang = 'en';
     if (!empty($article['title_kn'])) $sourceLang = 'kn';
     elseif (!empty($article['title_hi'])) $sourceLang = 'hi';
     elseif (!empty($article['title_en'])) $sourceLang = 'en';
-
     $updated = false;
     foreach ($fields as $field) {
         $langField = "{$field}_{$CURRENT_LANG}";
-        
         if (empty($article[$langField]) && !empty($article["{$field}_{$sourceLang}"])) {
             $translated = autoTranslate($article["{$field}_{$sourceLang}"], $sourceLang, $CURRENT_LANG);
             $article[$langField] = $translated;
-            
             if (!empty(trim(strip_tags($translated)))) {
                 $updated = true;
             }
         }
-        
-        $article[$field] = $article[$langField] ?: ($article["{$field}_en"] ?: ($article["{$field}_kn"] ?: $article["{$field}_hi"]));
+        $article[$field] = !empty($article[$langField]) ? $article[$langField] : (!empty($article["{$field}_en"]) ? $article["{$field}_en"] : (!empty($article["{$field}_kn"]) ? $article["{$field}_kn"] : $article["{$field}_hi"]));
     }
-
     if ($updated) {
         $news = getLocalNews();
         foreach ($news as &$n) {
@@ -163,20 +153,17 @@ function processArticleTranslations($article) {
         }
         saveLocalNews($news);
     }
-
-    $article['read_time'] = ceil(str_word_count(strip_tags($article['body'])) / 200) ?: 1;
-    $article['date'] = date('Y-m-d', strtotime($article['published_at']));
+    $article['read_time'] = ceil(str_word_count(strip_tags($article['body'] ?? '')) / 200) ?: 1;
+    $article['date'] = date('Y-m-d', strtotime($article['published_at'] ?? 'now'));
     return $article;
 }
 
 // Fetch Articles from JSON
 function getArticles($limit = 10, $category = null, $search = null) {
     $news = getLocalNews();
-
     if ($category) {
         $news = array_filter($news, fn($a) => $a['category'] === $category);
     }
-
     if ($search) {
         $search = strtolower($search);
         $news = array_filter($news, function($a) use ($search) {
@@ -185,8 +172,7 @@ function getArticles($limit = 10, $category = null, $search = null) {
                    str_contains(strtolower($a['title_hi'] ?? ''), $search);
         });
     }
-
-    usort($news, fn($a, $b) => strtotime($b['published_at']) <=> strtotime($a['published_at']));
+    usort($news, fn($a, $b) => strtotime($b['published_at'] ?? 'now') <=> strtotime($a['published_at'] ?? 'now'));
     $limited = array_slice($news, 0, (int)$limit);
     return array_map('processArticleTranslations', $limited);
 }
@@ -206,31 +192,24 @@ function getArticleBySlug($slug) {
     return null;
 }
 
-// Breaking news items: gets the latest news from EACH category
+// Breaking news items
 function getBreakingNews() {
     $news = getLocalNews();
     $items = [];
-
     foreach ($GLOBALS['CATEGORIES'] as $cat) {
         $catNews = array_filter($news, fn($a) => $a['category'] === $cat['slug']);
         if (!empty($catNews)) {
-            usort($catNews, fn($a, $b) => strtotime($b['published_at']) <=> strtotime($a['published_at']));
+            usort($catNews, fn($a, $b) => strtotime($b['published_at'] ?? 'now') <=> strtotime($a['published_at'] ?? 'now'));
             $items[] = reset($catNews);
         }
     }
-    
-    usort($items, fn($a, $b) => strtotime($b['published_at']) <=> strtotime($a['published_at']));
-    
+    usort($items, fn($a, $b) => strtotime($b['published_at'] ?? 'now') <=> strtotime($a['published_at'] ?? 'now'));
     $breaking = [];
     foreach ($items as $item) {
         $processed = processArticleTranslations($item);
         $breaking[] = $processed['title'];
     }
-
-    if (empty($breaking)) {
-        return ['Welcome to Ra. Power 28 News Portal'];
-    }
-    return $breaking;
+    return !empty($breaking) ? $breaking : ['Welcome to Ra. Power 28 News Portal'];
 }
 
 // Horoscope data
