@@ -131,7 +131,18 @@ function getEditableNews() {
 
 // Load All News Combined
 function getLocalNews() {
-    return array_merge(getPermanentNews(), getEditableNews());
+    $news = array_merge(getPermanentNews(), getEditableNews());
+    $viewsPath = BASE_PATH . '/data/views.json';
+    if (file_exists($viewsPath)) {
+        $views = json_decode(file_get_contents($viewsPath), true) ?: [];
+        foreach ($news as &$art) {
+            $id = $art['id'];
+            if (isset($views[$id])) {
+                $art['views'] = $views[$id];
+            }
+        }
+    }
+    return $news;
 }
 
 // Save News to Local JSON (ONLY saves editable new articles)
@@ -283,18 +294,21 @@ function incrementArticleViews($id) {
         return;
     }
 
-    $news = getLocalNews();
-    $updated = false;
-    foreach ($news as &$art) {
-        if ((int)$art['id'] === (int)$id) {
-            $art['views'] = (isset($art['views']) ? (int)$art['views'] : 0) + 1;
-            $updated = true;
-            break;
+    $viewsPath = BASE_PATH . '/data/views.json';
+    $views = file_exists($viewsPath) ? json_decode(file_get_contents($viewsPath), true) ?: [] : [];
+    
+    if (!isset($views[$id])) {
+        $news = getLocalNews();
+        foreach ($news as $art) {
+            if ((int)$art['id'] === (int)$id) {
+                $views[$id] = isset($art['views']) ? (int)$art['views'] : 0;
+                break;
+            }
         }
     }
     
-    if ($updated) {
-        saveLocalNews($news);
-        $_SESSION['viewed_posts'][] = (int)$id;
-    }
+    $views[$id] = (isset($views[$id]) ? $views[$id] : 0) + 1;
+    file_put_contents($viewsPath, json_encode($views, JSON_PRETTY_PRINT));
+    
+    $_SESSION['viewed_posts'][] = (int)$id;
 }
