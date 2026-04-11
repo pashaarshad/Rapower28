@@ -7,6 +7,7 @@ foreach ($articles as $a) {
     if ($a['slug'] === $slug) { $article = $a; break; }
 }
 if (!$article) $article = $articles[0]; // fallback
+incrementArticleViews($article['id']);
 $pageTitle = getArticleTitle($article);
 $artCat = array_values(array_filter($CATEGORIES, fn($c) => $c['slug'] === $article['category']));
 $catInfo = !empty($artCat) ? $artCat[0] : null;

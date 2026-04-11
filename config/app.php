@@ -1,4 +1,5 @@
 <?php
+session_start();
 /**
  * Ra. Power 28 - Application Configuration
  */
@@ -246,4 +247,35 @@ function getHoroscope() {
         ['sign'=>'Leo','kn'=>'ಸಿಂಹ','hi'=>'सिंह','icon'=>'♌','text_en'=>'Career growth opportunities ahead. Be prepared.','text_kn'=>'ವತ್ತಿ ಬೆಳವಣಿಗೆಯ ಅವಕಾಶಗಳು ಮುಂದಿವೆ.','text_hi'=>'करियर में तरक्की के अवसर आगे हैं।'],
         ['sign'=>'Virgo','kn'=>'ಕನ್ಯಾ','hi'=>'कन्या','icon'=>'♍','text_en'=>'A day of creative inspiration. Express yourself.','text_kn'=>'ಸೃಜನಶೀಲ ಸ್ಫೂರ್ತಿಯ ದಿನ.','text_hi'=>'रचनात्मक प्रेरणा का दिन।'],
     ];
+}
+
+/**
+ * Increment view count for an article
+ * Uses sessions to prevent multiple counts from the same user in one visit
+ */
+function incrementArticleViews($id) {
+    if (empty($id)) return;
+    
+    if (!isset($_SESSION['viewed_posts'])) {
+        $_SESSION['viewed_posts'] = [];
+    }
+    
+    if (in_array((int)$id, $_SESSION['viewed_posts'])) {
+        return;
+    }
+
+    $news = getLocalNews();
+    $updated = false;
+    foreach ($news as &$art) {
+        if ((int)$art['id'] === (int)$id) {
+            $art['views'] = (isset($art['views']) ? (int)$art['views'] : 0) + 1;
+            $updated = true;
+            break;
+        }
+    }
+    
+    if ($updated) {
+        saveLocalNews($news);
+        $_SESSION['viewed_posts'][] = (int)$id;
+    }
 }
