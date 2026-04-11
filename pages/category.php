@@ -7,12 +7,11 @@ $articles = getDummyArticles();
 if (!empty($cat)) {
     $cat = $cat[0];
     $pageTitle = getCatName($cat);
-    // Get articles for this category (show all articles as demo data is limited)
-    $catArticles = $articles;
+    $catArticles = getArticles(20, $cat['slug']);
 } else {
     $cat = ['en'=>'All News','kn'=>'ಎಲ್ಲಾ ಸುದ್ದಿ','hi'=>'सभी समाचार','icon'=>'📰','color'=>'#1B6B93','slug'=>'all'];
     $pageTitle = getCatName($cat);
-    $catArticles = $articles;
+    $catArticles = getArticles(20);
 }
 ?>
 

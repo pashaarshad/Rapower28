@@ -3,6 +3,20 @@ session_start();
 if (!isset($_SESSION['admin_logged_in'])) { header('Location: login.php'); exit; }
 require_once '../config/app.php';
 
+// Handle AJAX Sub-Image Upload
+if (isset($_POST['ajax_action']) && $_POST['ajax_action'] === 'sub_image_upload') {
+    if (isset($_FILES['sub_image']) && $_FILES['sub_image']['error'] === 0) {
+        $ext = pathinfo($_FILES['sub_image']['name'], PATHINFO_EXTENSION);
+        $name = 'sub_' . time() . '_' . rand(100, 999) . '.' . $ext;
+        if (!is_dir('../assets/images/news/')) mkdir('../assets/images/news/', 0777, true);
+        move_uploaded_file($_FILES['sub_image']['tmp_name'], '../assets/images/news/' . $name);
+        echo json_encode(['success' => true, 'filename' => $name]);
+    } else {
+        echo json_encode(['success' => false]);
+    }
+    exit;
+}
+
 $currentPage = $_GET['p'] ?? 'dashboard';
 $message = '';
 
@@ -237,7 +251,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
                             <button type="button" onclick="formatDoc('bold')"><b>B</b></button>
                             <button type="button" onclick="formatDoc('italic')"><i>I</i></button>
                             <span class="toolbar-sep">|</span>
-                            <button type="button" onclick="insertImage()">🖼️ Add Sub-Image</button>
+                            <button type="button" onclick="document.getElementById('subImageInput').click()">🖼️ Upload & Insert Image</button>
+                            <input type="file" id="subImageInput" style="display:none;" onchange="uploadSubImage(this)">
                         </div>
                         <textarea id="articleBody" name="body" class="form-input form-textarea" rows="15" placeholder="Write content here..." required><?= $editArt ? htmlspecialchars($editArt['body_en'] ?: ($editArt['body_kn'] ?: $editArt['body_hi'])) : '' ?></textarea>
                     </div>

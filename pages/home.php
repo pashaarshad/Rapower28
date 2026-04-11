@@ -72,10 +72,7 @@ $pageTitle = __('home');
                 if (empty($cat)) continue;
                 $cat = $cat[0];
                 $catArticles = getArticlesByCategory($articles, $catSlug, 4);
-                if (empty($catArticles)) {
-                    // Show all articles as fallback
-                    $catArticles = array_slice($articles, 0, 4);
-                }
+                if (empty($catArticles)) continue;
             ?>
             <section class="category-section reveal">
                 <div class="section-header" style="border-bottom-color:<?= $cat['color'] ?>">

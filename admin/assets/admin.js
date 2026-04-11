@@ -15,17 +15,30 @@ function formatDoc(command) {
     textarea.focus();
 }
 
-function insertImage() {
+async function uploadSubImage(input) {
+    if (!input.files || !input.files[0]) return;
+    
     const textarea = document.getElementById('articleBody');
-    if (!textarea) return;
+    const formData = new FormData();
+    formData.append('ajax_action', 'sub_image_upload');
+    formData.append('sub_image', input.files[0]);
 
-    const imgName = prompt('Enter the image filename (e.g., news_123.jpg):');
-    if (imgName) {
-        const imgTag = `\n<figure class="article-figure"><img src="assets/images/news/${imgName}" alt="Sub image"></figure>\n`;
-        const start = textarea.selectionStart;
-        textarea.setRangeText(imgTag, start, start, 'end');
-        textarea.focus();
+    try {
+        const response = await fetch('index.php', { method: 'POST', body: formData });
+        const data = await response.json();
+        
+        if (data.success) {
+            const imgTag = `\n<figure class="article-figure"><img src="assets/images/news/${data.filename}" alt="Image"></figure>\n`;
+            const start = textarea.selectionStart;
+            textarea.setRangeText(imgTag, start, start, 'end');
+            textarea.focus();
+        } else {
+            alert('Upload failed!');
+        }
+    } catch (e) {
+        alert('Error uploading image.');
     }
+    input.value = ''; // clear input
 }
 
 document.addEventListener('DOMContentLoaded', () => {

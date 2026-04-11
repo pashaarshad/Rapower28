@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 /**
  * Ra. Power 28 - Application Configuration
  */
@@ -119,8 +119,9 @@ function getLocalNews() {
 
 // Save News to Local JSON
 function saveLocalNews($news) {
+    if (empty($news)) $news = [];
     $path = BASE_PATH . '/data/news.json';
-    file_put_contents($path, json_encode($news, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
+    file_put_contents($path, json_encode(array_values($news), JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
 }
 
 // Process single article translations and update record
