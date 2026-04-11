@@ -150,8 +150,9 @@ function processArticleTranslations($article) {
     return $article;
 }
 
-// Fetch Articles from Database
+// Fetch Articles from Database + Legacy JSON
 function getArticles($limit = 10, $category = null, $search = null) {
+    $dbArticles = [];
     try {
         $db = getDB();
         $query = "SELECT * FROM rp_articles WHERE 1=1";
@@ -163,7 +164,8 @@ function getArticles($limit = 10, $category = null, $search = null) {
         }
 
         if ($search) {
-            $query .= " AND (title_kn LIKE ? OR title_en LIKE ?)";
+            $query .= " AND (title_kn LIKE ? OR title_en LIKE ? OR title_hi LIKE ?)";
+            $params[] = "%$search%";
             $params[] = "%$search%";
             $params[] = "%$search%";
         }
@@ -171,16 +173,36 @@ function getArticles($limit = 10, $category = null, $search = null) {
         $query .= " ORDER BY published_at DESC LIMIT " . (int)$limit;
         $stmt = $db->prepare($query);
         $stmt->execute($params);
-        $articles = $stmt->fetchAll();
+        $dbArticles = $stmt->fetchAll() ?: [];
+    } catch (Exception $e) {}
 
-        if ($articles) {
-            return array_map('processArticleTranslations', $articles);
-        }
-    } catch (Exception $e) {
-        // Log error if needed: error_log($e->getMessage());
+    // Load Legacy Data
+    $legacyArticles = [];
+    $jsonPath = BASE_PATH . '/data/legacy_articles.json';
+    if (file_exists($jsonPath)) {
+        $legacyArticles = json_decode(file_get_contents($jsonPath), true) ?: [];
     }
 
-    return [];
+    // Apply filters to legacy data
+    if ($category) {
+        $legacyArticles = array_filter($legacyArticles, fn($a) => $a['category'] === $category);
+    }
+    if ($search) {
+        $search = strtolower($search);
+        $legacyArticles = array_filter($legacyArticles, function($a) use ($search) {
+            return str_contains(strtolower($a['title_en'] ?? ''), $search) || 
+                   str_contains(strtolower($a['title_kn'] ?? ''), $search) || 
+                   str_contains(strtolower($a['title_hi'] ?? ''), $search);
+        });
+    }
+
+    // Merge and Sort
+    $allArticles = array_merge($dbArticles, $legacyArticles);
+    usort($allArticles, fn($a, $b) => strtotime($b['published_at']) <=> strtotime($a['published_at']));
+    
+    // Process translations and apply final limit
+    $limited = array_slice($allArticles, 0, (int)$limit);
+    return array_map('processArticleTranslations', $limited);
 }
 
 // Keep old function name for compatibility or alias it
@@ -215,12 +237,26 @@ function getBreakingNews() {
     try {
         $db = getDB();
         
-        // Fetch the latest article from each category
+        // Fetch the latest article from each category (DB + Legacy)
         $items = [];
+        $legacyPath = BASE_PATH . '/data/legacy_articles.json';
+        $legacyData = file_exists($legacyPath) ? json_decode(file_get_contents($legacyPath), true) : [];
+
         foreach ($CATEGORIES as $cat) {
+            // Try DB first
             $stmt = $db->prepare("SELECT * FROM rp_articles WHERE category = ? ORDER BY published_at DESC LIMIT 1");
             $stmt->execute([$cat['slug']]);
             $item = $stmt->fetch();
+            
+            if (!$item) {
+                // Try Legacy JSON
+                $catLegacy = array_filter($legacyData, fn($a) => $a['category'] === $cat['slug']);
+                if (!empty($catLegacy)) {
+                    usort($catLegacy, fn($a, $b) => strtotime($b['published_at']) <=> strtotime($a['published_at']));
+                    $item = reset($catLegacy);
+                }
+            }
+
             if ($item) {
                 $items[] = $item;
             }
