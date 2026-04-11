@@ -1,5 +1,7 @@
 <?php
-session_start();
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
 /**
  * Ra. Power 28 - Application Configuration
  */
@@ -210,7 +212,7 @@ function getDummyArticles($limit = 10, $category = null, $search = null) {
 function getArticleBySlug($slug) {
     $news = getLocalNews();
     foreach ($news as $article) {
-        if ($article['slug'] === $slug) {
+        if ($article['slug'] === $slug || urldecode($article['slug']) === urldecode($slug) || urlencode(urldecode($article['slug'])) === urlencode(urldecode($slug))) {
             return processArticleTranslations($article);
         }
     }

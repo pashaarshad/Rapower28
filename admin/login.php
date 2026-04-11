@@ -31,7 +31,7 @@
             <p>Admin Panel — ನಿರ್ವಾಹಕ ಫಲಕ</p>
         </div>
         <?php
-        session_start();
+        if (session_status() === PHP_SESSION_NONE) { session_start(); }
         $error = '';
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $user = $_POST['username'] ?? '';
