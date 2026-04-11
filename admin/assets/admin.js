@@ -1,8 +1,18 @@
 // Admin Panel JavaScript
+function updateToolbarStates() {
+    const isBold = document.queryCommandState('bold');
+    const isItalic = document.queryCommandState('italic');
+    const btnBold = document.querySelector('.btn-bold');
+    const btnItalic = document.querySelector('.btn-italic');
+    if (btnBold) btnBold.classList.toggle('active', isBold);
+    if (btnItalic) btnItalic.classList.toggle('active', isItalic);
+}
+
 function formatDoc(command) {
     document.execCommand(command, false, null);
     const editor = document.getElementById('articleBody');
     if (editor) editor.focus();
+    updateToolbarStates();
 }
 
 async function uploadSubImage(input) {
@@ -33,8 +43,15 @@ async function uploadSubImage(input) {
     input.value = ''; // clear input
 }
 
-
 document.addEventListener('DOMContentLoaded', () => {
+    // Toolbar state syncing
+    const editor = document.getElementById('articleBody');
+    if (editor) {
+        editor.addEventListener('keyup', updateToolbarStates);
+        editor.addEventListener('mouseup', updateToolbarStates);
+        editor.addEventListener('focus', updateToolbarStates);
+    }
+
     // Current nav highlighting logic
     const path = window.location.search;
     document.querySelectorAll('.nav-item').forEach(item => {

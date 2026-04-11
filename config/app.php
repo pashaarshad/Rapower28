@@ -113,18 +113,35 @@ function autoTranslate($text, $sourceLang, $targetLang) {
     return $text;
 }
 
-// Load News from Local JSON
-function getLocalNews() {
+// Load Permanent (Legacy) News
+function getPermanentNews() {
+    $path = BASE_PATH . '/data/permanent_news.json';
+    if (!file_exists($path)) return [];
+    $data = json_decode(file_get_contents($path), true) ?: [];
+    foreach ($data as &$item) { $item['_is_permanent'] = true; }
+    return $data;
+}
+
+// Load Editable (New) News
+function getEditableNews() {
     $path = BASE_PATH . '/data/news.json';
     if (!file_exists($path)) return [];
     return json_decode(file_get_contents($path), true) ?: [];
 }
 
-// Save News to Local JSON
-function saveLocalNews($news) {
-    if (empty($news)) $news = [];
+// Load All News Combined
+function getLocalNews() {
+    return array_merge(getPermanentNews(), getEditableNews());
+}
+
+// Save News to Local JSON (ONLY saves editable new articles)
+function saveLocalNews($allNews) {
+    if (empty($allNews)) $allNews = [];
+    $editableNews = array_filter($allNews, fn($a) => empty($a['_is_permanent']));
+    
+    // We clean up the array_values to prevent JSON object formatting instead of array
     $path = BASE_PATH . '/data/news.json';
-    file_put_contents($path, json_encode(array_values($news), JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
+    file_put_contents($path, json_encode(array_values($editableNews), JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
 }
 
 // Process single article translations and update record

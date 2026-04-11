@@ -307,8 +307,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
                             <td><?= htmlspecialchars($art['author']) ?></td>
                             <td><?= date('M d, Y', strtotime($art['published_at'])) ?></td>
                             <td>
-                                <a href="?p=edit&id=<?= $art['id'] ?>" class="btn" style="padding:0.2rem 0.5rem;font-size:0.75rem;background:#1B6B93;color:#fff;">✏️ Edit</a>
-                                <a href="?p=articles&delete_id=<?= $art['id'] ?>" class="btn" style="padding:0.2rem 0.5rem;font-size:0.75rem;background:#F44336;color:#fff;" onclick="return confirm('Delete this article?')">🗑️ Delete</a>
+                                <?php if(isset($art['_is_permanent'])): ?>
+                                    <span class="badge" style="background:#64748b;font-size:0.7rem;">🔒 Legacy Locked</span>
+                                <?php else: ?>
+                                    <a href="?p=edit&id=<?= $art['id'] ?>" class="btn" style="padding:0.2rem 0.5rem;font-size:0.75rem;background:#1B6B93;color:#fff;">✏️ Edit</a>
+                                    <a href="?p=articles&delete_id=<?= $art['id'] ?>" class="btn" style="padding:0.2rem 0.5rem;font-size:0.75rem;background:#F44336;color:#fff;" onclick="return confirm('Delete this article?')">🗑️ Delete</a>
+                                <?php endif; ?>
                             </td>
                         </tr>
                         <?php endforeach; if (empty($list)) echo '<tr><td colspan="5" style="text-align:center;">No articles found.</td></tr>'; ?>
