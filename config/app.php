@@ -94,10 +94,10 @@ require_once __DIR__ . '/db.php';
 
 
 // Online Auto-Translate via API
-function autoTranslate($text, $targetLang) {
-    if (empty(trim(strip_tags($text))) || $targetLang === 'kn') return $text;
+function autoTranslate($text, $sourceLang, $targetLang) {
+    if (empty(trim(strip_tags($text))) || $sourceLang === $targetLang) return $text;
 
-    $url = "https://translate.googleapis.com/translate_a/single?client=gtx&sl=kn&tl=$targetLang&dt=t&q=" . urlencode(substr($text, 0, 4000));
+    $url = "https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=$targetLang&dt=t&q=" . urlencode(substr($text, 0, 4000));
     $response = @file_get_contents($url);
     if ($response) {
         $result = json_decode($response, true);
@@ -117,12 +117,17 @@ function processArticleTranslations($article) {
     global $CURRENT_LANG;
     if (!$article) return null;
     
+    // Determine source language (first one with content)
+    $sourceLang = 'en';
+    if (!empty($article['title_kn'])) $sourceLang = 'kn';
+    elseif (!empty($article['title_hi'])) $sourceLang = 'hi';
+
     foreach (['title', 'body'] as $field) {
         $langField = "{$field}_{$CURRENT_LANG}";
         
-        // If content in desired language is missing, translate from Kannada
+        // If content in desired language is missing, translate from source
         if (empty(trim($article[$langField]))) {
-            $translated = autoTranslate($article["{$field}_kn"], $CURRENT_LANG);
+            $translated = autoTranslate($article["{$field}_{$sourceLang}"], $sourceLang, $CURRENT_LANG);
             $article[$langField] = $translated;
             
             // Save translation back to DB asynchronously
@@ -135,7 +140,6 @@ function processArticleTranslations($article) {
         }
         
         $article[$field] = $article[$langField];
-        // For fallback
         $article["{$field}_en"] = $article["{$field}_en"] ?? $article["{$field}_kn"]; 
         $article["{$field}_kn"] = $article["{$field}_kn"];
         $article["{$field}_hi"] = $article["{$field}_hi"] ?? $article["{$field}_kn"];
@@ -203,46 +207,60 @@ function getArticleBySlug($slug) {
 }
 
 
-// Breaking news items dynamically fetched and translated
+// Breaking news items: gets the latest news from EACH category
 function getBreakingNews() {
-    global $CURRENT_LANG;
-    $items = [];
+    global $CURRENT_LANG, $CATEGORIES;
+    $breaking = [];
 
     try {
         $db = getDB();
-        $stmt = $db->query("SELECT * FROM rp_articles WHERE is_breaking = 1 ORDER BY published_at DESC LIMIT 5");
-        $items = $stmt->fetchAll();
+        
+        // Fetch the latest article from each category
+        $items = [];
+        foreach ($CATEGORIES as $cat) {
+            $stmt = $db->prepare("SELECT * FROM rp_articles WHERE category = ? ORDER BY published_at DESC LIMIT 1");
+            $stmt->execute([$cat['slug']]);
+            $item = $stmt->fetch();
+            if ($item) {
+                $items[] = $item;
+            }
+        }
+        
+        // Sort items by published_at DESC to show most recent first
+        usort($items, fn($a, $b) => strtotime($b['published_at']) <=> strtotime($a['published_at']));
+        
+        foreach ($items as $item) {
+            $field = "title_{$CURRENT_LANG}";
+            if (empty(trim($item[$field]))) {
+                // Determine source language
+                $sourceLang = 'en';
+                if (!empty($item['title_kn'])) $sourceLang = 'kn';
+                elseif (!empty($item['title_hi'])) $sourceLang = 'hi';
+
+                $translated = autoTranslate($item["title_{$sourceLang}"], $sourceLang, $CURRENT_LANG);
+                $breaking[] = $translated;
+                
+                if (!empty(trim($translated))) {
+                    try {
+                        $upd = $db->prepare("UPDATE rp_articles SET $field = ? WHERE id = ?");
+                        $upd->execute([$translated, $item['id']]);
+                    } catch (Exception $e) {}
+                }
+            } else {
+                $breaking[] = $item[$field];
+            }
+        }
+
     } catch (Exception $e) {
-        // Error handling
+        // Log error
     }
 
-    
-    $breaking = [];
-    foreach ($items as $item) {
-        $field = "title_{$CURRENT_LANG}";
-        if (empty(trim($item[$field]))) {
-            $translated = autoTranslate($item['title_kn'], $CURRENT_LANG);
-            $breaking[] = $translated;
-            
-            if (!empty(trim($translated))) {
-                // We keep a DB update here just in case MySQL is still active
-                // so translations are saved over time.
-                try {
-                    $db = getDB();
-                    $upd = $db->prepare("UPDATE rp_articles SET $field = ? WHERE id = ?");
-                    $upd->execute([$translated, $item['id']]);
-                } catch (Exception $e) {}
-            }
-        } else {
-            $breaking[] = $item[$field];
-        }
-    }
-    // Check if empty
     if (empty($breaking)) {
         return ['Welcome to Ra. Power 28 News Portal'];
     }
     return $breaking;
 }
+
 
 // Horoscope data
 function getHoroscope() {
