@@ -1,7 +1,10 @@
 <?php
 global $CATEGORIES, $CURRENT_LANG;
-$articles = getDummyArticles();
-$featured = array_values(array_filter($articles, fn($a) => $a['is_featured']));
+$articles = getArticles(20);
+$featured = array_values(array_filter($articles, fn($a) => ($a['is_featured'] ?? false) || ($a['is_breaking'] ?? false)));
+if (empty($featured)) {
+    $featured = array_slice($articles, 0, 3);
+}
 $pageTitle = __('home');
 ?>
 
