@@ -66,6 +66,9 @@ function truncateText($text, $length = 120) {
 }
 
 function cleanArticleBody($html) {
-    // Remove Gutenberg block comments to keep HTML clean
-    return preg_replace('/<!--(.|\s)*?-->/', '', $html);
+    // Remove Gutenberg block comments
+    $html = preg_replace('/<!--(.|\s)*?-->/', '', $html);
+    // Remove old embedded figure/image blocks to prevent double images
+    $html = preg_replace('/<figure\b[^>]*>(.*?)<\/figure>/is', '', $html);
+    return $html;
 }
