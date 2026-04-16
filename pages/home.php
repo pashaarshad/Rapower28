@@ -1,10 +1,8 @@
 <?php
 global $CATEGORIES, $CURRENT_LANG;
 $articles = getArticles(20);
-$featured = array_values(array_filter($articles, fn($a) => ($a['is_featured'] ?? false) || ($a['is_breaking'] ?? false)));
-if (empty($featured)) {
-    $featured = array_slice($articles, 0, 3);
-}
+// Display the 3 most recently published articles in the hero section as a queue
+$featured = array_slice($articles, 0, 3);
 $pageTitle = __('home');
 ?>
 
@@ -47,14 +45,6 @@ $pageTitle = __('home');
                     </div>
                 </a>
                 <?php endforeach; ?>
-                <?php if (count($featured) < 3): ?>
-                <a href="<?= getArticleUrl($articles[2]) ?>" class="hero-sub animate-fadeInUp delay-2">
-                    <img src="<?= getImagePath($articles[2]['image']) ?>" alt="<?= htmlspecialchars(getArticleTitle($articles[2])) ?>">
-                    <div class="hero-overlay">
-                        <h2><?= htmlspecialchars(getArticleTitle($articles[2])) ?></h2>
-                    </div>
-                </a>
-                <?php endif; ?>
             </div>
             <?php endif; ?>
         </div>
