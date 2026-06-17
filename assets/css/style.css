@@ -404,6 +404,15 @@ h3 { font-size: 1.25rem; }
 .article-tags { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 2rem; padding-top: 1rem; border-top: 1px solid var(--color-border); }
 .article-tags .tag { background: var(--color-primary-bg); color: var(--color-primary); padding: 0.3rem 0.75rem; border-radius: 20px; font-size: 0.75rem; font-weight: 600; }
 
+/* ── Article Content Gutenberg Support ── */
+.article-body figure { margin: 1.5rem 0; width: 100%; text-align: center; }
+.article-body figure img { border-radius: var(--radius-md); box-shadow: var(--shadow-sm); display: inline-block; max-height: 600px; object-fit: contain; }
+.article-body figcaption { font-size: 0.8rem; color: var(--color-text-muted); padding-top: 0.5rem; }
+.article-body iframe { max-width: 100%; aspect-ratio: 16/9; border-radius: var(--radius-md); margin: 1.5rem 0; }
+.article-body h2, .article-body h3, .article-body h4 { margin: 2rem 0 1rem; color: var(--color-text); }
+.article-body ul, .article-body ol { margin-bottom: 1.5rem; padding-left: 2rem; }
+.article-body li { margin-bottom: 0.5rem; }
+
 /* ── Footer ── */
 .main-footer {
   background: #0A1628;

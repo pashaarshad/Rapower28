@@ -1,17 +1,17 @@
 <?php
 $q = $_GET['q'] ?? '';
-$articles = getDummyArticles();
-$results = [];
+$page = isset($_GET['pg']) ? (int)$_GET['pg'] : 1;
+$limit = 12;
+
 if ($q) {
-    $q_lower = mb_strtolower($q);
-    foreach ($articles as $art) {
-        if (mb_stripos($art['title_en'], $q) !== false || mb_stripos($art['title_kn'], $q) !== false ||
-            mb_stripos($art['title_hi'], $q) !== false || mb_stripos($art['body_en'], $q) !== false ||
-            mb_stripos($art['category'], $q) !== false) {
-            $results[] = $art;
-        }
-    }
+    $results = getArticles($limit, null, $q, $page);
+    $totalResults = getTotalArticlesCount(null, $q);
+} else {
+    $results = [];
+    $totalResults = 0;
 }
+
+$totalPages = ceil($totalResults / $limit);
 $pageTitle = __('search') . ($q ? ': ' . $q : '');
 ?>
 <section style="padding:2rem 0;min-height:50vh;">
@@ -34,6 +34,14 @@ $pageTitle = __('search') . ($q ? ': ' . $q : '');
             </a>
             <?php endforeach; ?>
         </div>
+        
+        <?php if ($totalPages > 1): ?>
+        <div class="pagination" style="margin-top:3rem;display:flex;justify-content:center;gap:0.5rem;">
+            <?php for ($i = 1; $i <= $totalPages; $i++): ?>
+                <a href="?page=search&q=<?= urlencode($q) ?>&pg=<?= $i ?>" class="<?= $page === $i ? 'active' : '' ?>" style="display:flex;align-items:center;justify-content:center;width:40px;height:40px;border-radius:6px;text-decoration:none;font-weight:700;<?= $page === $i ? 'background:#1B6B93;color:#fff;' : 'background:#fff;color:#1B6B93;border:1px solid #E2E8F0;' ?>"><?= $i ?></a>
+            <?php endfor; ?>
+        </div>
+        <?php endif; ?>
         <?php else: ?>
         <div style="text-align:center;padding:3rem;color:var(--color-text-muted);">
             <p style="font-size:1.1rem;"><?= __('search_placeholder') ?></p>

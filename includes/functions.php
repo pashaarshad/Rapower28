@@ -35,6 +35,7 @@ function getFeaturedArticles($articles) {
 }
 
 function getImagePath($img) {
+    if (empty($img)) return 'assets/images/default-news.jpg';
     return 'assets/images/news/' . $img;
 }
 
@@ -53,6 +54,21 @@ function getSiteTagline() {
 }
 
 function truncateText($text, $length = 120) {
-    if (strlen($text) <= $length) return $text;
-    return substr($text, 0, $length) . '...';
+    // Remove shortcodes and block comments like <!-- wp:paragraph -->
+    $text = preg_replace('/<!--(.|\s)*?-->/', '', $text);
+    // Remove HTML tags
+    $text = strip_tags($text);
+    // Trim extra spaces
+    $text = trim(preg_replace('/\s+/', ' ', $text));
+    
+    if (mb_strlen($text, 'UTF-8') <= $length) return $text;
+    return mb_substr($text, 0, $length, 'UTF-8') . '...';
+}
+
+function cleanArticleBody($html) {
+    // Remove Gutenberg block comments
+    $html = preg_replace('/<!--(.|\s)*?-->/', '', $html);
+    // Remove old embedded figure/image blocks to prevent double images
+    $html = preg_replace('/<figure\b[^>]*>(.*?)<\/figure>/is', '', $html);
+    return $html;
 }

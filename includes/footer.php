@@ -36,12 +36,12 @@
                     <li><a href="?page=contact"><?= __('contact') ?></a></li>
                     <li><a href="#"><?= __('privacy') ?></a></li>
                     <li><a href="#"><?= __('terms') ?></a></li>
-                    <li><a href="admin/login.php"><?= __('admin_panel') ?></a></li>
                 </ul>
             </div>
         </div>
         <div class="footer-bottom">
             <p>© <?= date('Y') ?> <?= getSiteName() ?> — <?= SITE_TAGLINE ?> — <?= __('copyright') ?></p>
+            <p style="margin-top: 5px; font-size: 0.9em;">Designed & Developed by <a href="https://www.arshadpasha.tech/" target="_blank" style="color: #var(--primary); text-decoration: none; font-weight: bold;">Arshad Pasha</a></p>
         </div>
     </div>
 </footer>

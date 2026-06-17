@@ -1,14 +1,14 @@
 <?php
 global $CURRENT_LANG;
-$allArticles = getDummyArticles();
+$allArticles = getArticles(50);
 $horoscope = getHoroscope();
 // Sort by views for trending
 $trending = $allArticles;
-usort($trending, fn($a,$b) => $b['views'] - $a['views']);
+usort($trending, fn($a,$b) => ($b['views'] ?? 0) - ($a['views'] ?? 0));
 $trending = array_slice($trending, 0, 5);
 // Latest
 $latest = $allArticles;
-usort($latest, fn($a,$b) => strtotime($b['date']) - strtotime($a['date']));
+usort($latest, fn($a,$b) => strtotime($b['published_at'] ?? $b['date']) - strtotime($a['published_at'] ?? $a['date']));
 $latest = array_slice($latest, 0, 5);
 ?>
 

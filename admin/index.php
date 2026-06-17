@@ -1,7 +1,96 @@
 <?php
-session_start();
+if (session_status() === PHP_SESSION_NONE) { session_start(); }
 if (!isset($_SESSION['admin_logged_in'])) { header('Location: login.php'); exit; }
+require_once '../config/app.php';
+
+// Handle AJAX Sub-Image Upload
+if (isset($_POST['ajax_action']) && $_POST['ajax_action'] === 'sub_image_upload') {
+    if (isset($_FILES['sub_image']) && $_FILES['sub_image']['error'] === 0) {
+        $ext = pathinfo($_FILES['sub_image']['name'], PATHINFO_EXTENSION);
+        $name = 'sub_' . time() . '_' . rand(100, 999) . '.' . $ext;
+        if (!is_dir('../assets/images/news/')) mkdir('../assets/images/news/', 0777, true);
+        move_uploaded_file($_FILES['sub_image']['tmp_name'], '../assets/images/news/' . $name);
+        echo json_encode(['success' => true, 'filename' => $name]);
+    } else {
+        echo json_encode(['success' => false]);
+    }
+    exit;
+}
+
 $currentPage = $_GET['p'] ?? 'dashboard';
+$message = '';
+
+// Handle Article Actions (Delete)
+if (isset($_GET['delete_id'])) {
+    $news = getLocalNews();
+    $id = (int)$_GET['delete_id'];
+    $news = array_filter($news, fn($a) => (int)$a['id'] !== $id);
+    saveLocalNews($news);
+    $message = '<div class="alert alert-success">🗑️ Article deleted successfully!</div>';
+}
+
+// Handle Article Submission (Create/Edit)
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
+    $news = getLocalNews();
+    $title = $_POST['title'];
+    $body = $_POST['body'];
+    $category = $_POST['category'];
+    $input_lang = $_POST['input_lang'] ?? 'en';
+    $author = $_POST['author'] ?: 'N Rajesh';
+    $slug = strtolower(trim(preg_replace('/[^A-Za-z0-9-]+/', '-', $title)));
+    
+    $published_at = $_POST['published_at'] ?: date('Y-m-d H:i:s');
+    
+    $title_field = "title_{$input_lang}";
+    $body_field = "body_{$input_lang}";
+
+    // Handle Image Upload
+    $imageName = '';
+    if (isset($_FILES['image']) && $_FILES['image']['error'] === 0) {
+        $ext = pathinfo($_FILES['image']['name'], PATHINFO_EXTENSION);
+        $imageName = 'news_' . time() . '_' . rand(100, 999) . '.' . $ext;
+        $target = '../assets/images/news/' . $imageName;
+        if (!is_dir('../assets/images/news/')) mkdir('../assets/images/news/', 0777, true);
+        move_uploaded_file($_FILES['image']['tmp_name'], $target);
+    }
+
+    if ($_POST['action'] === 'publish_article') {
+        $maxId = 0;
+        foreach($news as $n) if((int)$n['id'] > $maxId) $maxId = (int)$n['id'];
+        
+        $newArticle = [
+            'id' => $maxId + 1,
+            'slug' => $slug . '-' . time(),
+            'category' => $category,
+            'image' => $imageName,
+            $title_field => $title,
+            $body_field => $body,
+            'author' => $author,
+            'views' => 0,
+            'published_at' => $published_at,
+            'is_featured' => 0,
+            'is_breaking' => 0
+        ];
+        $news[] = $newArticle;
+        saveLocalNews($news);
+        $message = '<div class="alert alert-success">🚀 Article published successfully!</div>';
+    } elseif ($_POST['action'] === 'edit_article') {
+        $id = (int)$_POST['id'];
+        foreach ($news as &$art) {
+            if ((int)$art['id'] === $id) {
+                $art[$title_field] = $title;
+                $art[$body_field] = $body;
+                $art['category'] = $category;
+                $art['author'] = $author;
+                if ($imageName) $art['image'] = $imageName;
+                $art['published_at'] = $published_at;
+                break;
+            }
+        }
+        saveLocalNews($news);
+        $message = '<div class="alert alert-success">📝 Article updated successfully!</div>';
+    }
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -22,15 +111,8 @@ $currentPage = $_GET['p'] ?? 'dashboard';
         </div>
         <nav class="sidebar-nav">
             <a href="?p=dashboard" class="nav-item <?= $currentPage==='dashboard'?'active':'' ?>">📊 Dashboard</a>
-            <a href="?p=articles" class="nav-item <?= $currentPage==='articles'?'active':'' ?>">📝 Articles</a>
-            <a href="?p=create" class="nav-item <?= $currentPage==='create'?'active':'' ?>">➕ New Article</a>
-            <a href="?p=categories" class="nav-item <?= $currentPage==='categories'?'active':'' ?>">📂 Categories</a>
-            <a href="?p=media" class="nav-item <?= $currentPage==='media'?'active':'' ?>">🖼️ Media Library</a>
-            <a href="?p=epaper" class="nav-item <?= $currentPage==='epaper'?'active':'' ?>">📰 E-Paper</a>
-            <a href="?p=breaking" class="nav-item <?= $currentPage==='breaking'?'active':'' ?>">🔴 Breaking News</a>
-            <a href="?p=seo" class="nav-item <?= $currentPage==='seo'?'active':'' ?>">🔍 SEO Settings</a>
-            <a href="?p=analytics" class="nav-item <?= $currentPage==='analytics'?'active':'' ?>">📈 Analytics</a>
-            <a href="?p=users" class="nav-item <?= $currentPage==='users'?'active':'' ?>">👥 Users</a>
+            <a href="?p=articles" class="nav-item <?= $currentPage==='articles'?'active':'' ?>">📝 All Articles</a>
+            <a href="?p=create" class="nav-item <?= $currentPage==='create'?'active':'' ?>">➕ Add Articles/Post</a>
         </nav>
         <div class="sidebar-footer">
             <a href="../index.php" class="nav-item">🌐 View Website</a>
@@ -43,9 +125,7 @@ $currentPage = $_GET['p'] ?? 'dashboard';
         <header class="admin-header">
             <h1 class="admin-title">
                 <?php
-                $titles = ['dashboard'=>'📊 Dashboard','articles'=>'📝 All Articles','create'=>'➕ Create Article',
-                    'categories'=>'📂 Categories','media'=>'🖼️ Media Library','epaper'=>'📰 E-Paper',
-                    'breaking'=>'🔴 Breaking News','seo'=>'🔍 SEO Settings','analytics'=>'📈 Analytics','users'=>'👥 Users'];
+                $titles = ['dashboard'=>'📊 Dashboard','articles'=>'📝 All Articles','create'=>'➕ Add Articles/Post','edit'=>'✏️ Edit Article'];
                 echo $titles[$currentPage] ?? 'Dashboard';
                 ?>
             </h1>
@@ -55,20 +135,26 @@ $currentPage = $_GET['p'] ?? 'dashboard';
         </header>
 
         <div class="admin-content">
-        <?php if ($currentPage === 'dashboard'): ?>
+        <?= $message ?>
+        <?php if ($currentPage === 'dashboard'): 
+            $news = getLocalNews();
+            $totalArticles = count($news);
+            $totalViews = array_sum(array_column($news, 'views'));
+            $totalCategories = count($CATEGORIES);
+        ?>
             <!-- Dashboard Stats -->
             <div class="stats-grid">
                 <div class="stat-card" style="--accent:#2196F3;">
                     <div class="stat-icon">📝</div>
-                    <div class="stat-info"><div class="stat-number">248</div><div class="stat-label">Total Articles</div></div>
+                    <div class="stat-info"><div class="stat-number"><?= $totalArticles ?></div><div class="stat-label">Total Articles</div></div>
                 </div>
                 <div class="stat-card" style="--accent:#4CAF50;">
                     <div class="stat-icon">👁</div>
-                    <div class="stat-info"><div class="stat-number">1.2M</div><div class="stat-label">Total Views</div></div>
+                    <div class="stat-info"><div class="stat-number"><?= number_format($totalViews) ?></div><div class="stat-label">Total Views</div></div>
                 </div>
                 <div class="stat-card" style="--accent:#FF9800;">
                     <div class="stat-icon">📂</div>
-                    <div class="stat-info"><div class="stat-number">10</div><div class="stat-label">Categories</div></div>
+                    <div class="stat-info"><div class="stat-number"><?= $totalCategories ?></div><div class="stat-label">Categories</div></div>
                 </div>
                 <div class="stat-card" style="--accent:#E91E63;">
                     <div class="stat-icon">🌐</div>
@@ -82,11 +168,20 @@ $currentPage = $_GET['p'] ?? 'dashboard';
                 <table class="admin-table">
                     <thead><tr><th>Title</th><th>Category</th><th>Author</th><th>Date</th><th>Views</th><th>Status</th></tr></thead>
                     <tbody>
-                        <tr><td>Karnataka Budget 2026 Highlights</td><td><span class="badge" style="background:#9C27B0;">Politics</span></td><td>Rajesh Kumar</td><td>Mar 28</td><td>15,420</td><td><span class="badge" style="background:#22C55E;">Published</span></td></tr>
-                        <tr><td>IPL 2026: RCB Wins Thriller</td><td><span class="badge" style="background:#4CAF50;">Sports</span></td><td>Priya Sharma</td><td>Mar 27</td><td>28,340</td><td><span class="badge" style="background:#22C55E;">Published</span></td></tr>
-                        <tr><td>Bengaluru Metro Phase 3 Approved</td><td><span class="badge" style="background:#2196F3;">District</span></td><td>Anil Desai</td><td>Mar 27</td><td>12,890</td><td><span class="badge" style="background:#22C55E;">Published</span></td></tr>
-                        <tr><td>Green Energy Corridor Project</td><td><span class="badge" style="background:#00BCD4;">Health</span></td><td>Meera Nair</td><td>Mar 26</td><td>8,760</td><td><span class="badge" style="background:#F59E0B;">Draft</span></td></tr>
-                        <tr><td>G20 Energy Ministers Summit</td><td><span class="badge" style="background:#FF9800;">Country</span></td><td>Vikram Singh</td><td>Mar 26</td><td>19,200</td><td><span class="badge" style="background:#22C55E;">Published</span></td></tr>
+                        <?php
+                        $recent = getArticles(5);
+                        foreach ($recent as $art):
+                            $title = $art['title_en'] ?: ($art['title_kn'] ?: $art['title_hi']);
+                        ?>
+                        <tr>
+                            <td><?= htmlspecialchars(substr($title, 0, 50)) ?>...</td>
+                            <td><span class="badge" style="background:#2196F3;"><?= ucfirst($art['category']) ?></span></td>
+                            <td><?= htmlspecialchars($art['author']) ?></td>
+                            <td><?= date('M d', strtotime($art['published_at'])) ?></td>
+                            <td><?= number_format($art['views']) ?></td>
+                            <td><span class="badge" style="background:#22C55E;">Published</span></td>
+                        </tr>
+                        <?php endforeach; if (empty($recent)) echo '<tr><td colspan="6" style="text-align:center;">No articles found.</td></tr>'; ?>
                     </tbody>
                 </table>
             </div>
@@ -94,19 +189,43 @@ $currentPage = $_GET['p'] ?? 'dashboard';
             <!-- Quick Actions -->
             <div class="admin-card" style="margin-top:1.5rem;">
                 <div class="card-header"><h2>⚡ Quick Actions</h2></div>
-                <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;padding:1rem;">
-                    <a href="?p=create" class="quick-action">➕<br><small>New Article</small></a>
-                    <a href="?p=breaking" class="quick-action">🔴<br><small>Breaking News</small></a>
-                    <a href="?p=media" class="quick-action">🖼️<br><small>Upload Media</small></a>
-                    <a href="?p=epaper" class="quick-action">📰<br><small>Upload E-Paper</small></a>
+                <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;padding:1rem;">
+                    <a href="?p=create" class="quick-action">➕<br><small>Add New Post</small></a>
+                    <a href="?p=articles" class="quick-action">📝<br><small>View All Posts</small></a>
+                    <a href="../index.php" target="_blank" class="quick-action">🌐<br><small>View Site</small></a>
                 </div>
             </div>
 
-        <?php elseif ($currentPage === 'create'): ?>
-            <!-- Create Article Form -->
+        <?php elseif ($currentPage === 'create' || $currentPage === 'edit'): 
+            $editArt = null;
+            if ($currentPage === 'edit' && isset($_GET['id'])) {
+                $news = getLocalNews();
+                $id = (int)$_GET['id'];
+                foreach ($news as $n) {
+                    if ((int)$n['id'] === $id) {
+                        $editArt = $n;
+                        break;
+                    }
+                }
+            }
+        ?>
+            <!-- Create/Edit Article Form -->
             <div class="admin-card">
-                <div class="card-header"><h2>📝 Create New Article</h2></div>
-                <form class="article-form" style="padding:1.5rem;">
+                <div class="card-header"><h2><?= $currentPage === 'edit' ? '✏️ Edit Article' : '📝 Add Articles/Post' ?></h2></div>
+                <form method="POST" enctype="multipart/form-data" class="animate-fadeInUp" onsubmit="document.getElementById('articleBodyHidden').value = document.getElementById('articleBody').innerHTML">
+                    <input type="hidden" name="action" value="<?= $currentPage === 'edit' ? 'edit_article' : 'publish_article' ?>">
+                    <?php if($editArt): ?><input type="hidden" name="id" value="<?= $editArt['id'] ?>"><?php endif; ?>
+                    
+                    <div class="form-row">
+                        <label>Main Image *</label>
+                        <input type="file" name="image" class="form-input" accept="image/*" <?= $editArt ? '' : 'required' ?>>
+                        <?php if($editArt && !empty($editArt['image'])): ?>
+                            <div style="margin-top:0.5rem;">
+                                <img src="../assets/images/news/<?= $editArt['image'] ?>" style="height:60px;border-radius:4px;border:1px solid #ddd;">
+                                <p style="font-size:0.7rem;color:#666;">Current Image</p>
+                            </div>
+                        <?php endif; ?>
+                    </div>
                     <div class="form-row">
                         <label>Language of Input</label>
                         <div style="display:flex;gap:0.5rem;">
@@ -117,98 +236,86 @@ $currentPage = $_GET['p'] ?? 'dashboard';
                     </div>
                     <div class="form-row">
                         <label>Title *</label>
-                        <input type="text" class="form-input" placeholder="Enter article title..." required>
+                        <input type="text" name="title" class="form-input" placeholder="Enter title..." value="<?= $editArt ? htmlspecialchars($editArt['title_en'] ?: ($editArt['title_kn'] ?: $editArt['title_hi'])) : '' ?>" required>
                     </div>
                     <div class="form-row" style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
                         <div><label>Category *</label>
-                        <select class="form-input"><option>Select Category</option><option>District</option><option>Sports</option><option>Crime</option><option>Health & Environment</option><option>Country</option><option>Politics</option><option>State</option><option>Literature</option><option>Astrology</option><option>E-Paper</option></select></div>
-                        <div><label>Author</label><input type="text" class="form-input" value="Admin" placeholder="Author name"></div>
+                        <select name="category" class="form-input" required>
+                            <option value="">Select Category</option>
+                            <?php foreach($CATEGORIES as $cat): ?>
+                                <option value="<?= $cat['slug'] ?>" <?= ($editArt && $editArt['category'] === $cat['slug']) ? 'selected' : '' ?>><?= $cat['en'] ?></option>
+                            <?php endforeach; ?>
+                        </select></div>
+                        <div><label>Author</label><input type="text" name="author" class="form-input" value="<?= $editArt ? htmlspecialchars($editArt['author']) : 'N Rajesh' ?>"></div>
                     </div>
                     <div class="form-row">
-                        <label>Featured Image</label>
-                        <div class="upload-zone" id="uploadZone">
-                            <p>📷 Drop image here or <strong>click to upload</strong></p>
-                            <input type="file" accept="image/*" style="display:none;" id="imageUpload">
-                        </div>
+                        <label>Published Date</label>
+                        <input type="datetime-local" name="published_at" class="form-input" value="<?= $editArt ? date('Y-m-d\TH:i', strtotime($editArt['published_at'])) : date('Y-m-d\TH:i') ?>">
                     </div>
                     <div class="form-row">
-                        <label>Article Body *</label>
+                        <label>Post Body *</label>
+                        <style>
+                            .toolbar-btn {
+                                background: #fff; border: 1px solid #cbd5e1; border-radius: 4px; padding: 4px 10px; cursor: pointer; color: #334155; transition: all 0.2s;
+                            }
+                            .toolbar-btn:hover {
+                                background: #f1f5f9; border-color: #94a3b8;
+                            }
+                            .toolbar-btn.active {
+                                background: #e0e7ff; border-color: #6366f1; color: #4f46e5;
+                            }
+                            .editor-toolbar {
+                                background: #f8fafc; padding: 0.75rem; border: 1px solid #e2e8f0; border-bottom: none; border-radius: 8px 8px 0 0; display: flex; align-items: center; gap: 0.5rem;
+                            }
+                        </style>
                         <div class="editor-toolbar">
-                            <button type="button" title="Bold"><b>B</b></button>
-                            <button type="button" title="Italic"><i>I</i></button>
-                            <button type="button" title="Underline"><u>U</u></button>
-                            <span class="toolbar-sep">|</span>
-                            <button type="button">H1</button>
-                            <button type="button">H2</button>
-                            <button type="button">H3</button>
-                            <span class="toolbar-sep">|</span>
-                            <button type="button">📷</button>
-                            <button type="button">🔗</button>
-                            <button type="button">📹</button>
-                            <span class="toolbar-sep">|</span>
-                            <button type="button">≡</button>
-                            <button type="button">"</button>
+                            <button type="button" class="toolbar-btn btn-bold" onclick="formatDoc('bold')" style="font-weight:bold;">B</button>
+                            <button type="button" class="toolbar-btn btn-italic" onclick="formatDoc('italic')" style="font-style:italic;">I</button>
+                            <span class="toolbar-sep" style="color:#94a3b8;margin:0 5px;">|</span>
+                            <button type="button" class="toolbar-btn" onclick="document.getElementById('subImageInput').click()">🖼️ Upload & Insert Image</button>
+                            <input type="file" id="subImageInput" style="display:none;" onchange="uploadSubImage(this)">
                         </div>
-                        <textarea class="form-input form-textarea" rows="12" placeholder="Write your article content here..."></textarea>
-                    </div>
-                    <div class="form-row">
-                        <label>Tags</label>
-                        <input type="text" class="form-input" placeholder="Add tags separated by commas...">
-                    </div>
-                    <div class="form-row" style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
-                        <div><label>Meta Title (SEO)</label><input type="text" class="form-input" placeholder="SEO title..."></div>
-                        <div><label>Focus Keyword</label><input type="text" class="form-input" placeholder="Primary keyword..."></div>
-                    </div>
-                    <div class="form-row">
-                        <label>Meta Description (SEO)</label>
-                        <textarea class="form-input" rows="2" placeholder="SEO meta description (160 chars)..."></textarea>
-                    </div>
-                    <div class="form-row">
-                        <label>Publishing Options</label>
-                        <div style="display:flex;gap:1.5rem;flex-wrap:wrap;">
-                            <label class="radio-label"><input type="radio" name="status" value="publish" checked> 🚀 Publish Now</label>
-                            <label class="radio-label"><input type="radio" name="status" value="schedule"> 📅 Schedule</label>
-                            <label class="radio-label"><input type="radio" name="status" value="draft"> 📋 Save as Draft</label>
-                        </div>
-                        <div style="display:flex;gap:1.5rem;margin-top:0.75rem;">
-                            <label class="check-label"><input type="checkbox"> 🔴 Mark as Breaking News</label>
-                            <label class="check-label"><input type="checkbox"> ⭐ Featured Article</label>
-                        </div>
-                    </div>
-                    <div class="form-row" style="background:#F0F9FF;padding:1rem;border-radius:8px;border:1px solid #BAE6FD;">
-                        <label style="margin-bottom:0.5rem;">🌐 Auto-Translation Preview</label>
-                        <div style="font-size:0.82rem;color:#4A5568;display:grid;gap:0.4rem;">
-                            <div>✅ <strong>English:</strong> <em>Title will appear here after typing...</em></div>
-                            <div>✅ <strong>ಕನ್ನಡ:</strong> <em>ಶೀರ್ಷಿಕೆ ಇಲ್ಲಿ ಕಾಣಿಸುತ್ತದೆ...</em></div>
-                            <div>✅ <strong>हिन्दी:</strong> <em>शीर्षक यहाँ दिखाई देगा...</em></div>
-                        </div>
+                        <div id="articleBody" class="form-input" contenteditable="true" style="min-height: 350px; border-radius: 0 0 8px 8px; background: #fff; overflow-y: auto; outline: none; padding: 1rem;"><?= $editArt ? htmlspecialchars_decode($editArt['body_en'] ?: ($editArt['body_kn'] ?: $editArt['body_hi'])) : '' ?></div>
+                        <textarea id="articleBodyHidden" name="body" style="display:none;"><?= $editArt ? htmlspecialchars($editArt['body_en'] ?: ($editArt['body_kn'] ?: $editArt['body_hi'])) : '' ?></textarea>
                     </div>
                     <div style="display:flex;gap:0.75rem;margin-top:1rem;">
-                        <button type="button" class="btn" style="background:#94A3B8;color:#fff;">💾 Save Draft</button>
-                        <button type="button" class="btn" style="background:#1B6B93;color:#fff;">👁️ Preview</button>
-                        <button type="submit" class="btn btn-primary" style="background:linear-gradient(135deg,#22C55E,#16A34A);">🚀 Publish Article</button>
+                        <button type="submit" class="btn btn-primary" style="background:linear-gradient(135deg,#22C55E,#16A34A);">💾 <?= $currentPage === 'edit' ? 'Update Post' : 'Publish Post' ?></button>
+                        <a href="?p=articles" class="btn" style="background:#94A3B8;color:#fff;text-decoration:none;display:flex;align-items:center;padding:0 1rem;">Cancel</a>
                     </div>
                 </form>
             </div>
+
 
         <?php elseif ($currentPage === 'articles'): ?>
             <!-- Article List -->
             <div class="admin-card">
                 <div class="card-header">
-                    <h2>📝 All Articles</h2>
-                    <div style="display:flex;gap:0.5rem;">
-                        <input type="text" class="form-input" placeholder="Search articles..." style="width:200px;padding:0.4rem 0.75rem;font-size:0.82rem;">
-                        <select class="form-input" style="padding:0.4rem 0.75rem;font-size:0.82rem;"><option>All Categories</option></select>
-                        <a href="?p=create" class="btn btn-primary" style="font-size:0.8rem;padding:0.4rem 1rem;">+ New</a>
-                    </div>
+                    <h2>📝 All Articles/Posts</h2>
+                    <a href="?p=create" class="btn btn-primary" style="font-size:0.8rem;padding:0.4rem 1rem;">+ Add New</a>
                 </div>
                 <table class="admin-table">
-                    <thead><tr><th><input type="checkbox"></th><th>Title</th><th>Category</th><th>Author</th><th>Date</th><th>Views</th><th>Status</th><th>Actions</th></tr></thead>
+                    <thead><tr><th>Title</th><th>Category</th><th>Author</th><th>Date</th><th>Actions</th></tr></thead>
                     <tbody>
-                        <tr><td><input type="checkbox"></td><td>Karnataka Budget 2026 Highlights</td><td><span class="badge" style="background:#9C27B0;">Politics</span></td><td>Rajesh Kumar</td><td>Mar 28</td><td>15,420</td><td><span class="badge" style="background:#22C55E;">Published</span></td><td><a href="#" style="color:#1B6B93;font-size:0.8rem;">✏️</a> <a href="#" style="color:#F44336;font-size:0.8rem;">🗑️</a></td></tr>
-                        <tr><td><input type="checkbox"></td><td>IPL 2026: RCB Wins Thriller Against CSK</td><td><span class="badge" style="background:#4CAF50;">Sports</span></td><td>Priya Sharma</td><td>Mar 27</td><td>28,340</td><td><span class="badge" style="background:#22C55E;">Published</span></td><td><a href="#" style="color:#1B6B93;font-size:0.8rem;">✏️</a> <a href="#" style="color:#F44336;font-size:0.8rem;">🗑️</a></td></tr>
-                        <tr><td><input type="checkbox"></td><td>Bengaluru Metro Phase 3 Gets Approval</td><td><span class="badge" style="background:#2196F3;">District</span></td><td>Anil Desai</td><td>Mar 27</td><td>12,890</td><td><span class="badge" style="background:#22C55E;">Published</span></td><td><a href="#" style="color:#1B6B93;font-size:0.8rem;">✏️</a> <a href="#" style="color:#F44336;font-size:0.8rem;">🗑️</a></td></tr>
-                        <tr><td><input type="checkbox"></td><td>Green Energy Corridor Project Launched</td><td><span class="badge" style="background:#00BCD4;">Health</span></td><td>Meera Nair</td><td>Mar 26</td><td>8,760</td><td><span class="badge" style="background:#F59E0B;">Draft</span></td><td><a href="#" style="color:#1B6B93;font-size:0.8rem;">✏️</a> <a href="#" style="color:#F44336;font-size:0.8rem;">🗑️</a></td></tr>
+                        <?php
+                        $list = getArticles(100);
+                        foreach ($list as $art):
+                            $title = $art['title_en'] ?: ($art['title_kn'] ?: $art['title_hi']);
+                        ?>
+                        <tr>
+                            <td><?= htmlspecialchars(substr($title, 0, 70)) ?>...</td>
+                            <td><span class="badge" style="background:#2196F3;"><?= ucfirst($art['category']) ?></span></td>
+                            <td><?= htmlspecialchars($art['author']) ?></td>
+                            <td><?= date('M d, Y', strtotime($art['published_at'])) ?></td>
+                            <td>
+                                <?php if(isset($art['_is_permanent'])): ?>
+                                    <span class="badge" style="background:#64748b;font-size:0.7rem;">🔒 Legacy Locked</span>
+                                <?php else: ?>
+                                    <a href="?p=edit&id=<?= $art['id'] ?>" class="btn" style="padding:0.2rem 0.5rem;font-size:0.75rem;background:#1B6B93;color:#fff;">✏️ Edit</a>
+                                    <a href="?p=articles&delete_id=<?= $art['id'] ?>" class="btn" style="padding:0.2rem 0.5rem;font-size:0.75rem;background:#F44336;color:#fff;" onclick="return confirm('Delete this article?')">🗑️ Delete</a>
+                                <?php endif; ?>
+                            </td>
+                        </tr>
+                        <?php endforeach; if (empty($list)) echo '<tr><td colspan="5" style="text-align:center;">No articles found.</td></tr>'; ?>
                     </tbody>
                 </table>
             </div>
@@ -223,6 +330,6 @@ $currentPage = $_GET['p'] ?? 'dashboard';
         </div>
     </main>
 </div>
-<script src="assets/admin.js"></script>
+<script src="assets/admin.js?v=<?= time() ?>"></script>
 </body>
 </html>

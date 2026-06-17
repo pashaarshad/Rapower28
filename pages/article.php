@@ -1,17 +1,21 @@
 <?php
 global $CATEGORIES, $CURRENT_LANG;
 $slug = $_GET['slug'] ?? '';
-$articles = getDummyArticles();
-$article = null;
-foreach ($articles as $a) {
-    if ($a['slug'] === $slug) { $article = $a; break; }
+$article = getArticleBySlug($slug);
+if (!$article) {
+    // If slug not found, try getting the most recent as fallback 
+    // or just use articles[0] if needed, but getArticleBySlug is the priority
+    $articles = getArticles(1);
+    $article = !empty($articles) ? $articles[0] : null;
 }
-if (!$article) $article = $articles[0]; // fallback
-$pageTitle = getArticleTitle($article);
-$artCat = array_values(array_filter($CATEGORIES, fn($c) => $c['slug'] === $article['category']));
+incrementArticleViews($article ? $article['id'] : null);
+$pageTitle = $article ? getArticleTitle($article) : 'Not Found';
+$artCat = ($article && isset($article['category'])) ? array_values(array_filter($CATEGORIES, fn($c) => $c['slug'] === $article['category'])) : [];
 $catInfo = !empty($artCat) ? $artCat[0] : null;
+
 // Related articles (different from current)
-$related = array_filter($articles, fn($a) => $a['id'] !== $article['id']);
+$allArticles = getArticles(10);
+$related = array_filter($allArticles, fn($a) => $article && $a['id'] !== $article['id']);
 $related = array_slice($related, 0, 3);
 ?>
 
@@ -51,7 +55,7 @@ $related = array_slice($related, 0, 3);
                 </div>
 
                 <div class="article-body" itemprop="articleBody">
-                    <p><?= nl2br(htmlspecialchars(getArticleBody($article))) ?></p>
+                    <?= cleanArticleBody(getArticleBody($article)) ?>
                     <p><?= $CURRENT_LANG === 'kn' ? 'ಈ ಸುದ್ದಿಯ ಬಗ್ಗೆ ಹೆಚ್ಚಿನ ಮಾಹಿತಿಗಾಗಿ ನಮ್ಮ ವೆಬ್‌ಸೈಟ್ ಅನ್ನು ನಿಯಮಿತವಾಗಿ ಭೇಟಿ ನೀಡಿ. ಈ ಬೆಳವಣಿಗೆಯ ಬಗ್ಗೆ ಹೆಚ್ಚಿನ ವಿವರಗಳು ಬಂದಂತೆ ನಾವು ನಿಮ್ಮನ್ನು ಅಪ್‌ಡೇಟ್ ಮಾಡುತ್ತೇವೆ. ಕರ್ನಾಟಕದ ಎಲ್ಲಾ ಇತ್ತೀಚಿನ ಸುದ್ದಿಗಳಿಗಾಗಿ ರಾ.ಪವರ್ 28 ಅನ್ನು ಅನುಸರಿಸಿ.' : ($CURRENT_LANG === 'hi' ? 'इस खबर के बारे में अधिक जानकारी के लिए हमारी वेबसाइट पर नियमित रूप से आएं। जैसे-जैसे इस विकास के बारे में अधिक विवरण आएंगे, हम आपको अपडेट करते रहेंगे। कर्नाटक की सभी नवीनतम खबरों के लिए रा. पावर 28 को फॉलो करें।' : 'For more information about this story, visit our website regularly. We will keep you updated as more details emerge about this development. Follow Ra. Power 28 for all the latest news from Karnataka, covering politics, sports, crime, health, and more.') ?></p>
                 </div>
 
