@@ -18,13 +18,13 @@ define('ADMIN_USER', 'admin');
 define('ADMIN_PASS', 'admin');
 define('BASE_PATH', dirname(__DIR__));
 
-// Current language (default English)
+// Current language (default Kannada)
 function getCurrentLang() {
     if (isset($_GET['lang']) && in_array($_GET['lang'], ['en','kn','hi'])) {
         setcookie('lang', $_GET['lang'], time()+86400*365, '/');
         return $_GET['lang'];
     }
-    return $_COOKIE['lang'] ?? 'en';
+    return $_COOKIE['lang'] ?? 'kn';
 }
 
 $CURRENT_LANG = getCurrentLang();
@@ -82,12 +82,12 @@ $UI_STRINGS = [
 
 function __($key) {
     global $UI_STRINGS, $CURRENT_LANG;
-    return $UI_STRINGS[$CURRENT_LANG][$key] ?? $UI_STRINGS['en'][$key] ?? $key;
+    return $UI_STRINGS[$CURRENT_LANG][$key] ?? $UI_STRINGS['kn'][$key] ?? $UI_STRINGS['en'][$key] ?? $key;
 }
 
 function getCatName($cat) {
     global $CURRENT_LANG;
-    return $cat[$CURRENT_LANG] ?? $cat['en'];
+    return $cat[$CURRENT_LANG] ?? $cat['kn'] ?? $cat['en'];
 }
 
 // Online Auto-Translate via API

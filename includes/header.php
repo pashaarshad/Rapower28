@@ -51,9 +51,9 @@
         </div>
         <div class="top-bar-right">
             <div class="lang-switcher" id="langSwitcher">
+                <a href="?lang=kn<?= isset($_GET['page']) ? '&page='.$_GET['page'] : '' ?><?= isset($_GET['slug']) ? '&slug='.$_GET['slug'] : '' ?>" class="<?= $CURRENT_LANG === 'kn' ? 'active' : '' ?>">ಕನ್ನಡ</a>
                 <a href="?lang=en<?= isset($_GET['page']) ? '&page='.$_GET['page'] : '' ?><?= isset($_GET['slug']) ? '&slug='.$_GET['slug'] : '' ?>" class="<?= $CURRENT_LANG === 'en' ? 'active' : '' ?>">EN</a>
-                <a href="?lang=kn<?= isset($_GET['page']) ? '&page='.$_GET['page'] : '' ?><?= isset($_GET['slug']) ? '&slug='.$_GET['slug'] : '' ?>" class="<?= $CURRENT_LANG === 'kn' ? 'active' : '' ?>">ಕ</a>
-                <a href="?lang=hi<?= isset($_GET['page']) ? '&page='.$_GET['page'] : '' ?><?= isset($_GET['slug']) ? '&slug='.$_GET['slug'] : '' ?>" class="<?= $CURRENT_LANG === 'hi' ? 'active' : '' ?>">हि</a>
+                <a href="?lang=hi<?= isset($_GET['page']) ? '&page='.$_GET['page'] : '' ?><?= isset($_GET['slug']) ? '&slug='.$_GET['slug'] : '' ?>" class="<?= $CURRENT_LANG === 'hi' ? 'active' : '' ?>">हिंदी</a>
             </div>
         </div>
     </div>

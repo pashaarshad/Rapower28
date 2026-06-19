@@ -16,13 +16,13 @@ function formatDate($date) {
 function getArticleTitle($article) {
     global $CURRENT_LANG;
     $key = 'title_' . $CURRENT_LANG;
-    return $article[$key] ?? $article['title_en'];
+    return $article[$key] ?? $article['title_kn'] ?? $article['title_en'];
 }
 
 function getArticleBody($article) {
     global $CURRENT_LANG;
     $key = 'body_' . $CURRENT_LANG;
-    return $article[$key] ?? $article['body_en'];
+    return $article[$key] ?? $article['body_kn'] ?? $article['body_en'];
 }
 
 function getArticlesByCategory($articles, $catSlug, $limit = 4) {
