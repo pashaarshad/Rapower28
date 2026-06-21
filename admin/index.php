@@ -35,7 +35,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
     $title = $_POST['title'];
     $body = $_POST['body'];
     $category = $_POST['category'];
-    $input_lang = $_POST['input_lang'] ?? 'en';
+    $input_lang = 'kn';
     $author = $_POST['author'] ?: 'N Rajesh';
     $slug = strtolower(trim(preg_replace('/[^A-Za-z0-9-]+/', '-', $title)));
     
@@ -93,7 +93,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
 }
 ?>
 <!DOCTYPE html>
-<html lang="en">
+<html lang="kn">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -171,7 +171,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
                         <?php
                         $recent = getArticles(5);
                         foreach ($recent as $art):
-                            $title = $art['title_en'] ?: ($art['title_kn'] ?: $art['title_hi']);
+                            $title = $art['title_kn'] ?: ($art['title_en'] ?: $art['title_hi']);
                         ?>
                         <tr>
                             <td><?= htmlspecialchars(substr($title, 0, 50)) ?>...</td>
@@ -226,24 +226,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
                             </div>
                         <?php endif; ?>
                     </div>
-                    <div class="form-row">
-                        <label>Language of Input</label>
-                        <div style="display:flex;gap:0.5rem;">
-                            <label class="radio-label"><input type="radio" name="input_lang" value="en" checked> English</label>
-                            <label class="radio-label"><input type="radio" name="input_lang" value="kn"> ಕನ್ನಡ</label>
-                            <label class="radio-label"><input type="radio" name="input_lang" value="hi"> हिन्दी</label>
-                        </div>
-                    </div>
+
                     <div class="form-row">
                         <label>Title *</label>
-                        <input type="text" name="title" class="form-input" placeholder="Enter title..." value="<?= $editArt ? htmlspecialchars($editArt['title_en'] ?: ($editArt['title_kn'] ?: $editArt['title_hi'])) : '' ?>" required>
+                        <input type="text" name="title" class="form-input" placeholder="Enter title..." value="<?= $editArt ? htmlspecialchars($editArt['title_kn'] ?: ($editArt['title_en'] ?: $editArt['title_hi'])) : '' ?>" required>
                     </div>
                     <div class="form-row" style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
                         <div><label>Category *</label>
                         <select name="category" class="form-input" required>
                             <option value="">Select Category</option>
                             <?php foreach($CATEGORIES as $cat): ?>
-                                <option value="<?= $cat['slug'] ?>" <?= ($editArt && $editArt['category'] === $cat['slug']) ? 'selected' : '' ?>><?= $cat['en'] ?></option>
+                                <option value="<?= $cat['slug'] ?>" <?= ($editArt && $editArt['category'] === $cat['slug']) ? 'selected' : '' ?>><?= $cat['kn'] ?></option>
                             <?php endforeach; ?>
                         </select></div>
                         <div><label>Author</label><input type="text" name="author" class="form-input" value="<?= $editArt ? htmlspecialchars($editArt['author']) : 'N Rajesh' ?>"></div>
@@ -275,8 +268,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
                             <button type="button" class="toolbar-btn" onclick="document.getElementById('subImageInput').click()">🖼️ Upload & Insert Image</button>
                             <input type="file" id="subImageInput" style="display:none;" onchange="uploadSubImage(this)">
                         </div>
-                        <div id="articleBody" class="form-input" contenteditable="true" style="min-height: 350px; border-radius: 0 0 8px 8px; background: #fff; overflow-y: auto; outline: none; padding: 1rem;"><?= $editArt ? htmlspecialchars_decode($editArt['body_en'] ?: ($editArt['body_kn'] ?: $editArt['body_hi'])) : '' ?></div>
-                        <textarea id="articleBodyHidden" name="body" style="display:none;"><?= $editArt ? htmlspecialchars($editArt['body_en'] ?: ($editArt['body_kn'] ?: $editArt['body_hi'])) : '' ?></textarea>
+                        <div id="articleBody" class="form-input" contenteditable="true" style="min-height: 350px; border-radius: 0 0 8px 8px; background: #fff; overflow-y: auto; outline: none; padding: 1rem;"><?= $editArt ? htmlspecialchars_decode($editArt['body_kn'] ?: ($editArt['body_en'] ?: $editArt['body_hi'])) : '' ?></div>
+                        <textarea id="articleBodyHidden" name="body" style="display:none;"><?= $editArt ? htmlspecialchars($editArt['body_kn'] ?: ($editArt['body_en'] ?: $editArt['body_hi'])) : '' ?></textarea>
                     </div>
                     <div style="display:flex;gap:0.75rem;margin-top:1rem;">
                         <button type="submit" class="btn btn-primary" style="background:linear-gradient(135deg,#22C55E,#16A34A);">💾 <?= $currentPage === 'edit' ? 'Update Post' : 'Publish Post' ?></button>
@@ -299,7 +292,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
                         <?php
                         $list = getArticles(100);
                         foreach ($list as $art):
-                            $title = $art['title_en'] ?: ($art['title_kn'] ?: $art['title_hi']);
+                            $title = $art['title_kn'] ?: ($art['title_en'] ?: $art['title_hi']);
                         ?>
                         <tr>
                             <td><?= htmlspecialchars(substr($title, 0, 70)) ?>...</td>

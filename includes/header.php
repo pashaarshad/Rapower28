@@ -1,6 +1,6 @@
 <?php global $CURRENT_LANG, $CATEGORIES, $pageTitle; ?>
 <!DOCTYPE html>
-<html lang="<?= $CURRENT_LANG === 'kn' ? 'kn' : ($CURRENT_LANG === 'hi' ? 'hi' : 'en') ?>">
+<html lang="kn">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -13,9 +13,7 @@
     <meta property="og:url" content="<?= SITE_URL ?>">
     <meta property="og:image" content="<?= SITE_URL ?>/assets/images/logo.png">
     <meta name="twitter:card" content="summary_large_image">
-    <link rel="alternate" hreflang="en" href="<?= SITE_URL ?>?lang=en">
-    <link rel="alternate" hreflang="kn" href="<?= SITE_URL ?>?lang=kn">
-    <link rel="alternate" hreflang="hi" href="<?= SITE_URL ?>?lang=hi">
+
     <link rel="canonical" href="<?= SITE_URL ?>">
     <link rel="icon" href="assets/images/logo.png" type="image/png">
     <link rel="stylesheet" href="assets/css/style.css">
@@ -50,11 +48,7 @@
             </div>
         </div>
         <div class="top-bar-right">
-            <div class="lang-switcher" id="langSwitcher">
-                <a href="?lang=kn<?= isset($_GET['page']) ? '&page='.$_GET['page'] : '' ?><?= isset($_GET['slug']) ? '&slug='.$_GET['slug'] : '' ?>" class="<?= $CURRENT_LANG === 'kn' ? 'active' : '' ?>">ಕನ್ನಡ</a>
-                <a href="?lang=en<?= isset($_GET['page']) ? '&page='.$_GET['page'] : '' ?><?= isset($_GET['slug']) ? '&slug='.$_GET['slug'] : '' ?>" class="<?= $CURRENT_LANG === 'en' ? 'active' : '' ?>">EN</a>
-                <a href="?lang=hi<?= isset($_GET['page']) ? '&page='.$_GET['page'] : '' ?><?= isset($_GET['slug']) ? '&slug='.$_GET['slug'] : '' ?>" class="<?= $CURRENT_LANG === 'hi' ? 'active' : '' ?>">हिंदी</a>
-            </div>
+            <!-- Language switcher removed as per client requirement -->
         </div>
     </div>
 </div>

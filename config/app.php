@@ -18,16 +18,7 @@ define('ADMIN_USER', 'admin');
 define('ADMIN_PASS', 'admin');
 define('BASE_PATH', dirname(__DIR__));
 
-// Current language (default Kannada)
-function getCurrentLang() {
-    if (isset($_GET['lang']) && in_array($_GET['lang'], ['en','kn','hi'])) {
-        setcookie('lang', $_GET['lang'], time()+86400*365, '/');
-        return $_GET['lang'];
-    }
-    return $_COOKIE['lang'] ?? 'kn';
-}
-
-$CURRENT_LANG = getCurrentLang();
+$CURRENT_LANG = 'kn';
 
 // Categories
 $CATEGORIES = [
@@ -45,17 +36,6 @@ $CATEGORIES = [
 
 // UI Translations
 $UI_STRINGS = [
-    'en' => [
-        'home'=>'Home','search'=>'Search','breaking_news'=>'Breaking News','trending'=>'Trending',
-        'latest'=>'Latest News','read_more'=>'Read More','see_all'=>'See All','share'=>'Share',
-        'about'=>'About Us','contact'=>'Contact','privacy'=>'Privacy Policy','terms'=>'Terms',
-        'subscribe'=>'Subscribe','published'=>'Published','author'=>'Author','views'=>'Views',
-        'related'=>'Related News','most_read'=>'Most Read','search_placeholder'=>'Search news...',
-        'categories'=>'Categories','follow_us'=>'Follow Us','copyright'=>'All Rights Reserved',
-        'min_read'=>'min read','back_to_home'=>'Back to Home','no_results'=>'No results found',
-        'load_more'=>'Load More','daily_horoscope'=>'Daily Horoscope',
-        'admin_panel'=>'Admin Panel','language'=>'Language',
-    ],
     'kn' => [
         'home'=>'ಮುಖಪುಟ','search'=>'ಹುಡುಕಿ','breaking_news'=>'ಬ್ರೇಕಿಂಗ್ ನ್ಯೂಸ್','trending'=>'ಟ್ರೆಂಡಿಂಗ್',
         'latest'=>'ಇತ್ತೀಚಿನ ಸುದ್ದಿ','read_more'=>'ಮತ್ತಷ್ಟು ಓದಿ','see_all'=>'ಎಲ್ಲಾ ನೋಡಿ','share'=>'ಹಂಚಿಕೊಳ್ಳಿ',
@@ -66,17 +46,6 @@ $UI_STRINGS = [
         'min_read'=>'ನಿಮಿಷ ಓದು','back_to_home'=>'ಮುಖಪುಟಕ್ಕೆ ಹಿಂತಿರುಗಿ','no_results'=>'ಯಾವುದೇ ಫಲಿತಾಂಶಗಳಿಲ್ಲ',
         'load_more'=>'ಇನ್ನಷ್ಟು ಲೋಡ್ ಮಾಡಿ','daily_horoscope'=>'ದಿನ ಭವಿಷ್ಯ',
         'admin_panel'=>'ನಿರ್ವಹಣಾ ಫಲಕ','language'=>'ಭಾಷೆ',
-    ],
-    'hi' => [
-        'home'=>'मुख्यपृष्ठ','search'=>'खोजें','breaking_news'=>'ब्रेकिंग न्यूज़','trending'=>'ट्रेंडिंग',
-        'latest'=>'नवीनतम समाचार','read_more'=>'और पढ़ें','see_all'=>'सभी देखें','share'=>'शेयर करें',
-        'about'=>'हमारे बारे में','contact'=>'संपर्क करें','privacy'=>'गोपनीयता नीति','terms'=>'नियम और शर्तें',
-        'subscribe'=>'सब्सक्राइब करें','published'=>'प्रकाशित','author'=>'लेखक','views'=>'व्यूज',
-        'related'=>'संबंधित समाचार','most_read'=>'सबसे ज्यादा पढ़ा गया','search_placeholder'=>'खबरें खोजें...',
-        'categories'=>'श्रेणियां','follow_us'=>'हमें फॉलो करें','copyright'=>'सर्वाधिकार सुरक्षित',
-        'min_read'=>'मिनट पढ़ें','back_to_home'=>'मुख्यपृष्ठ पर वापस','no_results'=>'कोई परिणाम नहीं मिला',
-        'load_more'=>'और लोड करें','daily_horoscope'=>'दैनिक राशिफल',
-        'admin_panel'=>'एडमिन पैनल','language'=>'भाषा',
     ]
 ];
 
@@ -90,26 +59,8 @@ function getCatName($cat) {
     return $cat[$CURRENT_LANG] ?? $cat['kn'] ?? $cat['en'];
 }
 
-// Online Auto-Translate via API
+// Online Auto-Translate via API (Disabled, single language only)
 function autoTranslate($text, $sourceLang, $targetLang) {
-    if (empty(trim(strip_tags($text))) || $sourceLang === $targetLang) return $text;
-    $url = "https://translate.googleapis.com/translate_a/single?client=gtx&sl=" . $sourceLang . "&tl=" . $targetLang . "&dt=t&q=" . urlencode($text);
-    $ch = curl_init();
-    curl_setopt($ch, CURLOPT_URL, $url);
-    curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-    curl_setopt($ch, CURLOPT_TIMEOUT, 5);
-    $response = curl_exec($ch);
-    curl_close($ch);
-    if ($response) {
-        $result = json_decode($response, true);
-        if (isset($result[0])) {
-            $translatedText = "";
-            foreach ($result[0] as $part) {
-                $translatedText .= $part[0];
-            }
-            return $translatedText;
-        }
-    }
     return $text;
 }
 
@@ -155,36 +106,10 @@ function saveLocalNews($allNews) {
     file_put_contents($path, json_encode(array_values($editableNews), JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
 }
 
-// Process single article translations and update record
+// Process single article and set fields
 function processArticleTranslations($article) {
-    global $CURRENT_LANG;
-    $fields = ['title', 'body'];
-    $sourceLang = 'en';
-    if (!empty($article['title_kn'])) $sourceLang = 'kn';
-    elseif (!empty($article['title_hi'])) $sourceLang = 'hi';
-    elseif (!empty($article['title_en'])) $sourceLang = 'en';
-    $updated = false;
-    foreach ($fields as $field) {
-        $langField = "{$field}_{$CURRENT_LANG}";
-        if (empty($article[$langField]) && !empty($article["{$field}_{$sourceLang}"])) {
-            $translated = autoTranslate($article["{$field}_{$sourceLang}"], $sourceLang, $CURRENT_LANG);
-            $article[$langField] = $translated;
-            if (!empty(trim(strip_tags($translated)))) {
-                $updated = true;
-            }
-        }
-        $article[$field] = !empty($article[$langField]) ? $article[$langField] : (!empty($article["{$field}_en"]) ? $article["{$field}_en"] : (!empty($article["{$field}_kn"]) ? $article["{$field}_kn"] : $article["{$field}_hi"]));
-    }
-    if ($updated) {
-        $news = getLocalNews();
-        foreach ($news as &$n) {
-            if ($n['id'] == $article['id']) {
-                $n = $article;
-                break;
-            }
-        }
-        saveLocalNews($news);
-    }
+    $article['title'] = !empty($article['title_kn']) ? $article['title_kn'] : ($article['title_en'] ?? $article['title_hi'] ?? '');
+    $article['body'] = !empty($article['body_kn']) ? $article['body_kn'] : ($article['body_en'] ?? $article['body_hi'] ?? '');
     $article['read_time'] = ceil(str_word_count(strip_tags($article['body'] ?? '')) / 200) ?: 1;
     $article['date'] = date('Y-m-d', strtotime($article['published_at'] ?? 'now'));
     return $article;
