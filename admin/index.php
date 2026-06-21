@@ -8,8 +8,8 @@ if (isset($_POST['ajax_action']) && $_POST['ajax_action'] === 'sub_image_upload'
     if (isset($_FILES['sub_image']) && $_FILES['sub_image']['error'] === 0) {
         $ext = pathinfo($_FILES['sub_image']['name'], PATHINFO_EXTENSION);
         $name = 'sub_' . time() . '_' . rand(100, 999) . '.' . $ext;
-        if (!is_dir('../assets/images/news/')) mkdir('../assets/images/news/', 0777, true);
-        move_uploaded_file($_FILES['sub_image']['tmp_name'], '../assets/images/news/' . $name);
+        if (!is_dir('../data/news_images/')) mkdir('../data/news_images/', 0777, true);
+        move_uploaded_file($_FILES['sub_image']['tmp_name'], '../data/news_images/' . $name);
         echo json_encode(['success' => true, 'filename' => $name]);
     } else {
         echo json_encode(['success' => false]);
@@ -49,8 +49,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
     if (isset($_FILES['image']) && $_FILES['image']['error'] === 0) {
         $ext = pathinfo($_FILES['image']['name'], PATHINFO_EXTENSION);
         $imageName = 'news_' . time() . '_' . rand(100, 999) . '.' . $ext;
-        $target = '../assets/images/news/' . $imageName;
-        if (!is_dir('../assets/images/news/')) mkdir('../assets/images/news/', 0777, true);
+        $target = '../data/news_images/' . $imageName;
+        if (!is_dir('../data/news_images/')) mkdir('../data/news_images/', 0777, true);
         move_uploaded_file($_FILES['image']['tmp_name'], $target);
     }
 
@@ -221,7 +221,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
                         <input type="file" name="image" class="form-input" accept="image/*" <?= $editArt ? '' : 'required' ?>>
                         <?php if($editArt && !empty($editArt['image'])): ?>
                             <div style="margin-top:0.5rem;">
-                                <img src="../assets/images/news/<?= $editArt['image'] ?>" style="height:60px;border-radius:4px;border:1px solid #ddd;">
+                                <img src="../data/news_images/<?= $editArt['image'] ?>" style="height:60px;border-radius:4px;border:1px solid #ddd;">
                                 <p style="font-size:0.7rem;color:#666;">Current Image</p>
                             </div>
                         <?php endif; ?>

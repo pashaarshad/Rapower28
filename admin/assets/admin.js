@@ -28,7 +28,7 @@ async function uploadSubImage(input) {
         
         if (data.success) {
             // Insert the image into the WYSIWYG editor
-            const imgHtml = `<figure class="article-figure" style="max-width:100%;margin:1rem 0;text-align:center;"><img src="assets/images/news/${data.filename}" alt="Article Image" style="max-width:100%;height:auto;border-radius:8px;"></figure><p><br></p>`;
+            const imgHtml = `<figure class="article-figure" style="max-width:100%;margin:1rem 0;text-align:center;"><img src="data/news_images/${data.filename}" alt="Article Image" style="max-width:100%;height:auto;border-radius:8px;"></figure><p><br></p>`;
             
             const editor = document.getElementById('articleBody');
             editor.focus();

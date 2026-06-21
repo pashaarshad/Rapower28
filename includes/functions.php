@@ -36,7 +36,7 @@ function getFeaturedArticles($articles) {
 
 function getImagePath($img) {
     if (empty($img)) return 'assets/images/default-news.jpg';
-    return 'assets/images/news/' . $img;
+    return 'data/news_images/' . $img;
 }
 
 function getSiteName() {
