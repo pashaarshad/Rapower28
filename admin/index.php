@@ -7,10 +7,19 @@ require_once '../config/app.php';
 if (isset($_POST['ajax_action']) && $_POST['ajax_action'] === 'sub_image_upload') {
     if (isset($_FILES['sub_image']) && $_FILES['sub_image']['error'] === 0) {
         $ext = pathinfo($_FILES['sub_image']['name'], PATHINFO_EXTENSION);
+        $monthFolder = date('Y-m');
+        $uploadDir = '../data/news_images/' . $monthFolder . '/';
+        if (!is_dir($uploadDir)) {
+            mkdir($uploadDir, 0755, true);
+            chmod($uploadDir, 0755);
+        }
         $name = 'sub_' . time() . '_' . rand(100, 999) . '.' . $ext;
-        if (!is_dir('../data/news_images/')) mkdir('../data/news_images/', 0777, true);
-        move_uploaded_file($_FILES['sub_image']['tmp_name'], '../data/news_images/' . $name);
-        echo json_encode(['success' => true, 'filename' => $name]);
+        $fullPath = $uploadDir . $name;
+        move_uploaded_file($_FILES['sub_image']['tmp_name'], $fullPath);
+        @chmod($fullPath, 0644);
+        // Store relative path from news_images root
+        $relativeName = $monthFolder . '/' . $name;
+        echo json_encode(['success' => true, 'filename' => $relativeName]);
     } else {
         echo json_encode(['success' => false]);
     }
@@ -48,10 +57,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
     $imageName = '';
     if (isset($_FILES['image']) && $_FILES['image']['error'] === 0) {
         $ext = pathinfo($_FILES['image']['name'], PATHINFO_EXTENSION);
-        $imageName = 'news_' . time() . '_' . rand(100, 999) . '.' . $ext;
-        $target = '../data/news_images/' . $imageName;
-        if (!is_dir('../data/news_images/')) mkdir('../data/news_images/', 0777, true);
+        $monthFolder = date('Y-m', strtotime($published_at));
+        $uploadDir = '../data/news_images/' . $monthFolder . '/';
+        if (!is_dir($uploadDir)) {
+            mkdir($uploadDir, 0755, true);
+            chmod($uploadDir, 0755);
+        }
+        $fileName = 'news_' . time() . '_' . rand(100, 999) . '.' . $ext;
+        $target = $uploadDir . $fileName;
         move_uploaded_file($_FILES['image']['tmp_name'], $target);
+        @chmod($target, 0644);
+        // Store relative path from news_images root
+        $imageName = $monthFolder . '/' . $fileName;
     }
 
     if ($_POST['action'] === 'publish_article') {
