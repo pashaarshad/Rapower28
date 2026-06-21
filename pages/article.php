@@ -43,11 +43,15 @@ $related = array_slice($related, 0, 3);
                     </div>
                 </div>
 
+                <?php
+                $shareUrl = urlencode(SITE_URL . '/?page=article&slug=' . $article['slug']);
+                $shareTitle = urlencode(getArticleTitle($article));
+                ?>
                 <div class="share-bar">
-                    <a href="#" class="share-btn fb">📘 Facebook</a>
-                    <a href="#" class="share-btn tw">🐦 Twitter</a>
-                    <a href="#" class="share-btn wa">💬 WhatsApp</a>
-                    <a href="#" class="share-btn tg">✈️ Telegram</a>
+                    <a href="https://www.facebook.com/sharer/sharer.php?u=<?= $shareUrl ?>" target="_blank" rel="noopener noreferrer" class="share-btn fb">📘 Facebook</a>
+                    <a href="https://twitter.com/intent/tweet?url=<?= $shareUrl ?>&text=<?= $shareTitle ?>" target="_blank" rel="noopener noreferrer" class="share-btn tw">🐦 Twitter</a>
+                    <a href="https://api.whatsapp.com/send?text=<?= $shareTitle ?>%20<?= $shareUrl ?>" target="_blank" rel="noopener noreferrer" class="share-btn wa" data-action="share/whatsapp/share">💬 WhatsApp</a>
+                    <a href="https://t.me/share/url?url=<?= $shareUrl ?>&text=<?= $shareTitle ?>" target="_blank" rel="noopener noreferrer" class="share-btn tg">✈️ Telegram</a>
                 </div>
 
                 <div class="article-featured-img">
@@ -56,7 +60,7 @@ $related = array_slice($related, 0, 3);
 
                 <div class="article-body" itemprop="articleBody">
                     <?= cleanArticleBody(getArticleBody($article)) ?>
-                    <p><?= $CURRENT_LANG === 'kn' ? 'ಈ ಸುದ್ದಿಯ ಬಗ್ಗೆ ಹೆಚ್ಚಿನ ಮಾಹಿತಿಗಾಗಿ ನಮ್ಮ ವೆಬ್‌ಸೈಟ್ ಅನ್ನು ನಿಯಮಿತವಾಗಿ ಭೇಟಿ ನೀಡಿ. ಈ ಬೆಳವಣಿಗೆಯ ಬಗ್ಗೆ ಹೆಚ್ಚಿನ ವಿವರಗಳು ಬಂದಂತೆ ನಾವು ನಿಮ್ಮನ್ನು ಅಪ್‌ಡೇಟ್ ಮಾಡುತ್ತೇವೆ. ಕರ್ನಾಟಕದ ಎಲ್ಲಾ ಇತ್ತೀಚಿನ ಸುದ್ದಿಗಳಿಗಾಗಿ ರಾ.ಪವರ್ 28 ಅನ್ನು ಅನುಸರಿಸಿ.' : ($CURRENT_LANG === 'hi' ? 'इस खबर के बारे में अधिक जानकारी के लिए हमारी वेबसाइट पर नियमित रूप से आएं। जैसे-जैसे इस विकास के बारे में अधिक विवरण आएंगे, हम आपको अपडेट करते रहेंगे। कर्नाटक की सभी नवीनतम खबरों के लिए रा. पावर 28 को फॉलो करें।' : 'For more information about this story, visit our website regularly. We will keep you updated as more details emerge about this development. Follow Ra. Power 28 for all the latest news from Karnataka, covering politics, sports, crime, health, and more.') ?></p>
+                    <p>ಈ ಸುದ್ದಿಯ ಬಗ್ಗೆ ಹೆಚ್ಚಿನ ಮಾಹಿತಿಗಾಗಿ ನಮ್ಮ ವೆಬ್‌ಸೈಟ್ ಅನ್ನು ನಿಯಮಿತವಾಗಿ ಭೇಟಿ ನೀಡಿ. ಈ ಬೆಳವಣಿಗೆಯ ಬಗ್ಗೆ ಹೆಚ್ಚಿನ ವಿವರಗಳು ಬಂದಂತೆ ನಾವು ನಿಮ್ಮನ್ನು ಅಪ್‌ಡೇಟ್ ಮಾಡುತ್ತೇವೆ. ಕರ್ನಾಟಕದ ಎಲ್ಲಾ ಇತ್ತೀಚಿನ ಸುದ್ದಿಗಳಿಗಾಗಿ ರಾ.ಪವರ್ 28 ಅನ್ನು ಅನುಸರಿಸಿ.</p>
                 </div>
 
                 <div class="article-tags">

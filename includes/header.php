@@ -1,17 +1,36 @@
-<?php global $CURRENT_LANG, $CATEGORIES, $pageTitle; ?>
+<?php 
+global $CURRENT_LANG, $CATEGORIES, $pageTitle; 
+
+// Dynamic Open Graph Tags
+$ogTitle = getSiteName() . ' - ' . getSiteTagline();
+$ogDesc = "ರಾ ಪವರ್ 28 ವೆಬ್ ಸೈಟ್ ಪುಟ ಓದಿರಿ. ಕರ್ನಾಟಕದ ತಾಜಾ ಸುದ್ದಿಗಳು, ಕನ್ನಡ ನ್ಯೂಸ್.";
+$ogImage = SITE_URL . "/assets/images/logo.png";
+$ogUrl = SITE_URL;
+
+if (isset($_GET['page']) && $_GET['page'] === 'article' && !empty($_GET['slug'])) {
+    $slug = $_GET['slug'];
+    $article = getArticleBySlug($slug);
+    if ($article) {
+        $ogTitle = getArticleTitle($article);
+        $ogDesc = truncateText(getArticleBody($article), 160);
+        $ogImage = SITE_URL . '/' . getImagePath($article['image']);
+        $ogUrl = SITE_URL . '/?page=article&slug=' . $slug;
+    }
+}
+?>
 <!DOCTYPE html>
 <html lang="kn">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?= isset($pageTitle) ? htmlspecialchars($pageTitle) . ' | ' : '' ?><?= getSiteName() ?> - <?= getSiteTagline() ?></title>
-    <meta name="description" content="<?= getSiteName() ?> - <?= getSiteTagline() ?>. Get latest news in Kannada, English, Hindi. ಕನ್ನಡ ನ್ಯೂಸ್, Karnataka news, ಕರ್ನಾಟಕ ಸುದ್ದಿ, breaking news, politics, sports, crime, health.">
-    <meta name="keywords" content="Kannada news today, ಕನ್ನಡ ನ್ಯೂಸ್, Karnataka latest news, ಕರ್ನಾಟಕ ಸುದ್ದಿ, breaking news Karnataka, Ra Power 28, ರಾ ಪವರ್ 28, India news Kannada, कर्नाटक समाचार, district news Karnataka, Karnataka politics, sports news, crime news, health news, ರಾಶಿ ಭವಿಷ್ಯ, daily horoscope Kannada, e-paper, ನಿಂಪು ವಾರ್ತೆ, Kannada newspaper online, Bangalore news today, ಬೆಂಗಳೂರು ಸುದ್ದಿ">
-    <meta property="og:title" content="<?= getSiteName() ?> - <?= getSiteTagline() ?>">
-    <meta property="og:description" content="Latest news from Karnataka in Kannada, English, Hindi. ಕನ್ನಡ ನ್ಯೂಸ್, ಕರ್ನಾಟಕ ಸುದ್ದಿ.">
-    <meta property="og:type" content="website">
-    <meta property="og:url" content="<?= SITE_URL ?>">
-    <meta property="og:image" content="<?= SITE_URL ?>/assets/images/logo.png">
+    <meta name="description" content="<?= htmlspecialchars($ogDesc) ?>">
+    <meta name="keywords" content="Kannada news today, ಕನ್ನಡ ನ್ಯೂಸ್, Karnataka latest news, ಕರ್ನಾಟಕ ಸುದ್ದಿ, breaking news Karnataka, Ra Power 28, ರಾ ಪವರ್ 28, India news Kannada, district news Karnataka, Karnataka politics, sports news, crime news, health news">
+    <meta property="og:title" content="<?= htmlspecialchars($ogTitle) ?>">
+    <meta property="og:description" content="<?= htmlspecialchars($ogDesc) ?>">
+    <meta property="og:type" content="<?= isset($_GET['page']) && $_GET['page'] === 'article' ? 'article' : 'website' ?>">
+    <meta property="og:url" content="<?= $ogUrl ?>">
+    <meta property="og:image" content="<?= $ogImage ?>">
     <meta name="twitter:card" content="summary_large_image">
 
     <link rel="canonical" href="<?= SITE_URL ?>">
