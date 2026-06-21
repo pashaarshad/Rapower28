@@ -16,6 +16,7 @@ jobs:
           username: 'root'
           key: ${{ secrets.RAPOWER28 }}
           port: 22
+          timeout: 2m
           script: |
             cd /var/www/rapower28
             git config --global --add safe.directory /var/www/rapower28
