@@ -774,18 +774,5 @@
         "published_at": "2026-08-11T16:19",
         "is_featured": 0,
         "is_breaking": 0
-    },
-    {
-        "id": 190,
-        "slug": "test-1788805079",
-        "category": "sports",
-        "image": "2026-09\/news_1788805079_467.jpg",
-        "title_kn": "Test",
-        "body_kn": "asfd",
-        "author": "N Rajesh",
-        "views": 0,
-        "published_at": "2026-09-07T18:17",
-        "is_featured": 0,
-        "is_breaking": 0
     }
 ]
