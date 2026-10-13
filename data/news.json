@@ -1153,19 +1153,6 @@
         "is_breaking": 0
     },
     {
-        "id": 219,
-        "slug": "jgf-1791902667",
-        "category": "politics",
-        "image": "2026-10\/news_1791902667_630.jpg",
-        "title_kn": "Jgf",
-        "body_kn": "Meeting Summary – Key Points<div>SR Management: Confirm whether to extend the existing SR or create a new one; avoid premature closure before all in-scope sites are implemented.<\/div><div>Commercial Requirements: Share requirements with Livanova and confirm the appropriate reviewers.<\/div><div>Site Ownership: Confirm commercial leads for North America, Germany, Brazil, Houston, and Aruba.<\/div><div>Manufacturing UR Review: 41 URs uploaded to Jira; review is needed before solution confirmation sessions.<\/div><div>Review Deadline: Friday may be too soon; the team requested at least one week.<\/div><div>Jira Data Gaps: Update missing global\/local classifications and sprint information.<\/div><div>Next Steps: Send the commercial scope email, confirm responsibilities, and agree on the review timeline.<\/div>",
-        "author": "N Rajesh",
-        "views": 1,
-        "published_at": "2026-10-13T14:43",
-        "is_featured": 0,
-        "is_breaking": 0
-    },
-    {
         "id": 220,
         "slug": "-1791902667",
         "category": null,
