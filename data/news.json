@@ -1385,18 +1385,5 @@
         "published_at": "2026-11-11T14:08",
         "is_featured": 0,
         "is_breaking": 0
-    },
-    {
-        "id": 238,
-        "slug": "i-1795008891",
-        "category": "state",
-        "image": "2026-11\/news_1795008891_444.jpg",
-        "title_kn": "I",
-        "body_kn": "Ok",
-        "author": "N Rajesh",
-        "views": 0,
-        "published_at": "2026-11-18T13:34",
-        "is_featured": 0,
-        "is_breaking": 0
     }
 ]
